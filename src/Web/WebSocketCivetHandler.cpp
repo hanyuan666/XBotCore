@@ -53,7 +53,8 @@ bool WebSocketHandler::handleData(CivetServer *server,
     Document d;
     d.ParseStream(stream);
     
-    sharedData->clearJointMap();      
+    sharedData->clearJointMap();     
+    WebRobotStateRX rxstate;     
     if( d.HasMember("joint")){          
         //assert(d["joint"].isArray());
         const Value& array = d["joint"];
@@ -61,9 +62,17 @@ bool WebSocketHandler::handleData(CivetServer *server,
             const Value& obj = array[i];
             int id = obj["id"].GetInt();
             double val = obj["val"].GetDouble();
-            sharedData->insertJoint(id,val);              
-        }        
-      }    
+            rxstate.joint_id.push_back(id);
+            rxstate.position_ref.push_back(val);
+            rxstate.vel_ref.push_back(0.0);
+            rxstate.effort_ref.push_back(0.0);
+            rxstate.stiffness.push_back(0);
+            rxstate.damping.push_back(0); 
+            //sharedData->insertJoint(id,val);              
+        }               
+      }     
+     
+    sharedData->setRobotState(rxstate);   
         
     //read robot state
     WebRobotStateTX rstate;
