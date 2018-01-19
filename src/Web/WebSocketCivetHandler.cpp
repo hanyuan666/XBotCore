@@ -53,7 +53,9 @@ bool WebSocketHandler::handleData(CivetServer *server,
     Document d;
     d.ParseStream(stream);
     
-    sharedData->clearJointMap();     
+    
+    sharedData->clearJointMap(); 
+    
     WebRobotStateRX rxstate;     
     if( d.HasMember("joint")){          
         //assert(d["joint"].isArray());
@@ -70,10 +72,49 @@ bool WebSocketHandler::handleData(CivetServer *server,
             rxstate.damping.push_back(0); 
             //sharedData->insertJoint(id,val);              
         }               
-      }     
+      }  
+    
+     if( d.HasMember("joint")){   
+     sharedData->setRobotState(rxstate);
+     }
      
-    sharedData->setRobotState(rxstate);   
-        
+     if( d.HasMember("target")){   
+     
+       //read type cmd
+       //if xyz read xyz and orientation
+       //write to pipe
+       
+       const Value& array = d["target"];
+        for (SizeType i = 0; i < array.Size(); i++){
+            const Value& obj = array[i];
+            double x = obj["x"].GetDouble();
+            double y = obj["y"].GetDouble();
+            double z = obj["z"].GetDouble();
+            //std::cout<<"x "<<x<< "y "<< y<< "z "<<z <<std::endl;
+            
+            double qx = obj["ox"].GetDouble();
+            double qy = obj["oy"].GetDouble();
+            double qz = obj["oz"].GetDouble();
+            double qw = obj["ow"].GetDouble();
+             
+            Eigen::Affine3d pose;
+            Eigen::Vector3d position_raw = Eigen::Vector3d(x, y, z);
+            pose.translation() = position_raw;            
+                        
+            Eigen::Quaterniond q;
+            q.x() = qx;
+            q.y() = qy;
+            q.z() = qz;
+            q.w() = qw;
+            pose.linear() = q.toRotationMatrix();            
+            
+            /*pose.linear() << 0,  0,  1,
+                                  0, 1,  0,
+                                  -1,  0,  0;
+            */                      
+            _pub_nrt[1].write(pose);
+     }}
+     
     //read robot state
     WebRobotStateTX rstate;
     bool resp = buffer->remove(rstate);
@@ -84,6 +125,7 @@ bool WebSocketHandler::handleData(CivetServer *server,
     if(resp){      
         rstate.serialize(buffer);
         btosend = buffer.GetString();
+        //std::cout<<"pos"<<std::string((char*)btosend)<<std::endl;
     }
         
     if( btosend!=nullptr)
