@@ -46,9 +46,9 @@ class WebSocketHandler : public CivetWebSocketHandler {
       _pipe_names.push_back("w_T_left_ee_ref");
       _pipe_names.push_back("w_T_right_ee_ref");
     
-      for(std::string pipe_name : _pipe_names){
+      /*for(std::string pipe_name : _pipe_names){
         _pub_nrt.push_back(XBot::PublisherNRT<Eigen::Affine3d>(pipe_name));
-    }
+    }*/
     }
            
     virtual bool handleConnection(CivetServer *server, const struct mg_connection *conn);
