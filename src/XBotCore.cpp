@@ -41,8 +41,12 @@ using XBot::Logger;
 
 std::shared_ptr<Loader> XBot::XBotCore::loaderptr;
 
-XBot::XBotCore::XBotCore(const char* config_yaml,  const char* param) : 
-    _path_to_config(config_yaml)
+XBot::XBotCore::XBotCore(std::string config_yaml, 
+                         XBot::SharedMemory::Ptr shmem,  
+                         Options options) : 
+    _path_to_config(config_yaml),
+    _shmem(shmem),
+    _options(options)
 {        
    
     YAML::Node root_cfg = YAML::LoadFile(config_yaml);
@@ -83,24 +87,30 @@ XBot::XBotCore::XBotCore(const char* config_yaml,  const char* param) :
       lib_name = hal_lib["lib_name"].as<std::string>();
     }
     
-    if (param != nullptr) {
+    if(options.xbotcore_dummy_mode){
       
-        if(strcmp(param,"dummy") == 0) {
             lib_file = "libXBotDummy";
             lib_name = "DUMMY";
+            
             // NOTE dummy needs high level config
             abs_low_level_config = std::string(config_yaml);
-        }
     }
     
     halInterface = HALInterfaceFactory::getFactory(lib_file, lib_name, abs_low_level_config.c_str());
+    
     if(!halInterface) exit(1);
 }
 
-XBot::XBotCore::XBotCore(const char* config_yaml, 
+XBot::XBotCore::XBotCore(std::string config_yaml, 
                          std::shared_ptr<HALInterface> halinterface, 
-                         std::shared_ptr<XBot::TimeProviderFunction<boost::function<double()>>> time_provider) : 
-    _path_to_config(config_yaml)
+                         XBot::SharedMemory::Ptr shmem,
+                         Options options,
+                         std::shared_ptr<XBot::TimeProviderFunction<boost::function<double()>>> time_provider
+                         
+                        ) : 
+    _path_to_config(config_yaml),
+    _shmem(shmem),
+    _options(options)
 {        
     _time_provider = time_provider;
     halInterface = halinterface;
@@ -116,15 +126,20 @@ void XBot::XBotCore::init_internal()
 {
     // create robot from config file and any map
     XBot::AnyMapPtr anymap = std::make_shared<XBot::AnyMap>();
+    std::shared_ptr<HALInterface> hal(halInterface);
     std::shared_ptr<XBot::IXBotJoint> xbot_joint(halInterface);
     std::shared_ptr<XBot::IXBotFT> xbot_ft(halInterface);
     std::shared_ptr<XBot::IXBotIMU> xbot_imu(halInterface);
     std::shared_ptr<XBot::IXBotHand> xbot_hand(halInterface);
     
+    // TODO initilize it somewhere else
+    bool xbot_enable_transmission = true;
+    
     (*anymap)["XBotJoint"] = boost::any(xbot_joint);
     (*anymap)["XBotFT"] = boost::any(xbot_ft);
     (*anymap)["XBotIMU"] = boost::any(xbot_imu);
     (*anymap)["XBotHand"] = boost::any(xbot_hand);
+    (*anymap)["EnableTransmissionPlugins"] = boost::any(xbot_enable_transmission);
     
     //TODO use isRT from RobotControlInterface robotInterface.IsRt()
     _robot = XBot::RobotInterface::getRobot(_path_to_config, "", anymap, "XBotRT");
@@ -138,16 +153,11 @@ void XBot::XBotCore::init_internal()
     }
     
     // create plugin handler
-    _pluginHandler = std::make_shared<XBot::PluginHandler>(_robot, _time_provider, "XBotRTPlugins");
-    
-    // define the XBotCore shared_memory for the RT plugins
-    XBot::SharedMemory::Ptr shared_memory = std::make_shared<XBot::SharedMemory>();
-    
-    //
+    _pluginHandler = std::make_shared<XBot::PluginHandler>(_robot, _time_provider, _shmem, _options);
+
     _pluginHandler->load_plugins();
     
-    //
-    _pluginHandler->init_plugins(shared_memory, xbot_joint, xbot_ft, xbot_imu);
+    _pluginHandler->init_plugins(hal);
     
     loaderptr = std::make_shared<Loader>(_pluginHandler);
     loaderth = new XBot::XBotLoaderThread();
