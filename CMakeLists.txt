@@ -82,7 +82,6 @@ find_package(catkin QUIET COMPONENTS roscpp sensor_msgs std_srvs message_generat
 find_package(YARP QUIET)
 find_package(kdl_parser REQUIRED)
 find_package(Boost REQUIRED COMPONENTS program_options)
-find_package(sharedlibpp REQUIRED)
 
 option(BUILD_TESTS "Compile XCM tests" FALSE)
 
@@ -134,7 +133,6 @@ set(COMMON_LIBS
 include_directories(include ${XBotInterface_INCLUDE_DIRS}
                             ${XBotCore-interfaces_INCLUDE_DIRS}
                             ${XBotCoreModel_INCLUDE_DIRS} 
-                            ${sharedlibpp_INCLUDE_DIRS}
                             ${kdl_parser_INCLUDE_DIRS}
                             include/XBotCore/
                             include/Civet/
@@ -306,8 +304,7 @@ target_link_libraries(${PROJECT_NAME} ${COMMON_LIBS}
                                       
                                       
 target_link_libraries(XBotCoreThread    ${COMMON_LIBS}
-                                        ${XBotCoreModel_LIBRARIES}                                        
-                                        ${sharedlibpp_LIBRARIES}
+                                        ${XBotCoreModel_LIBRARIES}     
                                         XCM
                                         ) 
                                         
