@@ -336,6 +336,8 @@ ycm_library_install(RobotStateLogger 1 0 0)
 
 add_subdirectory(src/XBotPlugin)
 
+add_subdirectory(src/IOPlugin)
+
 
 ycm_library_install(webserver 1 0 0) 
 
