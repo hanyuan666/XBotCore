@@ -27,6 +27,10 @@
 #include <WebRobotState.h>
 #include <Request.h>
 
+
+#include <XBotCore-interfaces/XDomainCommunication.h>
+#include <eigen_conversions/eigen_msg.h>
+
 class WebRobotStateTX;
 class SharedData;
 
@@ -37,7 +41,14 @@ class WebSocketHandler : public CivetWebSocketHandler {
     WebSocketHandler(std::shared_ptr<Buffer<WebRobotStateTX>> buffer, std::shared_ptr<SharedData> sharedData){
       
       this->buffer = buffer;
-      this->sharedData = sharedData;      
+      this->sharedData = sharedData;    
+      
+      _pipe_names.push_back("w_T_left_ee_ref");
+      _pipe_names.push_back("w_T_right_ee_ref");
+    
+      /*for(std::string pipe_name : _pipe_names){
+        _pub_nrt.push_back(XBot::PublisherNRT<Eigen::Affine3d>(pipe_name));
+    }*/
     }
            
     virtual bool handleConnection(CivetServer *server, const struct mg_connection *conn);
@@ -55,6 +66,9 @@ class WebSocketHandler : public CivetWebSocketHandler {
   private:
     std::shared_ptr<Buffer<WebRobotStateTX>> buffer;
     std::shared_ptr<SharedData> sharedData;
+    
+    std::vector<std::string> _pipe_names;
+    std::vector<XBot::PublisherNRT<Eigen::Affine3d>> _pub_nrt;
 };
 
 #endif //__WEBSOCKET_CIVET_HANDLER_WEBSERVER_H__
