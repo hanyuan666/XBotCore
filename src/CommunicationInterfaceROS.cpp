@@ -171,7 +171,7 @@ void CommunicationInterfaceROS::load_robot_state_publisher()
     kdl_parser::treeFromUrdfModel(_robot->getUrdf(), kdl_tree);
     resume_stdout(fd);
 
-     _robot_state_pub = std::make_shared<robot_state_publisher::RobotStatePublisher>(kdl_tree);
+//     _robot_state_pub = std::make_shared<robot_state_publisher::RobotStatePublisher>(kdl_tree);
 
     _urdf_param_name = "/xbotcore/" + _robot->getUrdf().getName() + "/robot_description";
     _tf_prefix = "/xbotcore/" + _robot->getUrdf().getName();
@@ -258,10 +258,10 @@ void CommunicationInterfaceROS::sendRobotState()
     _robot->getJointPosition(_joint_name_map);
     std::map<std::string, double> _joint_name_std_map(_joint_name_map.begin(), _joint_name_map.end());
 
-    if(_robot_state_pub && _publish_tf){
-        _robot_state_pub->publishTransforms(_joint_name_std_map, ros::Time::now(), "");
-        _robot_state_pub->publishFixedTransforms("");
-    }
+//     if(_robot_state_pub && _publish_tf){
+//         _robot_state_pub->publishTransforms(_joint_name_std_map, ros::Time::now(), "");
+//         _robot_state_pub->publishFixedTransforms("");
+//     }
 
 
     /* Joint states */
