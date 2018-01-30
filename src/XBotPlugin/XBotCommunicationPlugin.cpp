@@ -41,7 +41,9 @@ bool XBot::XBotCommunicationPlugin::init_control_plugin(XBot::Handle::Ptr handle
     
     // NOTE filter ON by default
     _filter_enabled = true;
-    _robot->getMotorPosition(_qref);
+    //we take the previous reference
+    _robot->getPositionReference(_qref);
+    //_robot->getMotorPosition(_qref);
     _robot->getStiffness(_kref);
     _robot->getDamping(_dref);
     _robot->getJointVelocity(_qdotref);
@@ -61,7 +63,9 @@ bool XBot::XBotCommunicationPlugin::init_control_plugin(XBot::Handle::Ptr handle
 void XBot::XBotCommunicationPlugin::on_start(double time)
 {
     _start_time = time;
-    _robot->getMotorPosition(_q0);
+    //_robot->getMotorPosition(_q0);
+    //we take the previous reference
+    _robot->getPositionReference(_q0);
     _robot->getStiffness(_k0);
     _robot->getDamping(_d0);
     _robot->getJointVelocity(_qdot0);

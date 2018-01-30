@@ -72,7 +72,9 @@ void HomingExample::on_start(double time)
 {
     _first_loop_time = time;
     _robot->sense();
-    _robot->getJointPosition(_q0);
+    //_robot->getJointPosition(_q0);
+    //we take the previous reference
+    _robot->getPositionReference(_q0);
     
    
     
