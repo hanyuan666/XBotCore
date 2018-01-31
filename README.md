@@ -38,4 +38,8 @@ that the implementation and integration of the R-HAL within
 the XBot framework does not generate additional computational
 overheads for the robot computational units.
 
+<a href="https://www.youtube.com/watch?v=lcAB4lHbma0
+" target="_blank"><img src="http://i3.ytimg.com/vi/lcAB4lHbma0/maxresdefault.jpg" 
+alt="OpenSoT + PI" width="480" height="360" border="10" /><br>XBot R-HAL</a>
+
 
