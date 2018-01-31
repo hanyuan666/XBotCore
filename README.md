@@ -1,8 +1,8 @@
 # XBotCore
 
-XBotCore is the new software architecture to control ADVR robots: it uses Xenomai API to satisfy Real-Time requirements. 
-
-Moreover it provides XDDP pipes communication with a Not-Real-Time communication API. 
+XBotCore (Cross-Bot-Core) is a light-weight, Real-Time (RT) software platform for robotics.
+It is completely open-source and is designed to be both a RT robot control framework and a software middleware. It satisfies
+hard RT requirements, while ensuring 1 kHz control loop even in complex Multi-Degree-Of-Freedom systems. It provides a simple and easy-to-use middleware Application Programming Interface (API), for both RT and non-RT control frameworks. This API is completely flexible with respect to the framework a user wants to utilize. Moreover it is possible to reuse the code written using XBotCore API with different robots (cross-robot feature).
 
 ## Reference paper
 A paper describing the XBotCore software architecture can be downloaded [here](https://www.researchgate.net/publication/316514802_XBotCore_A_Real-Time_Cross-Robot_Software_Platform) . If you're going to use this library for your work, please quote it within any resulting publication:
@@ -40,6 +40,6 @@ overheads for the robot computational units.
 
 <a href="https://www.youtube.com/watch?v=lcAB4lHbma0
 " target="_blank"><img src="http://i3.ytimg.com/vi/lcAB4lHbma0/maxresdefault.jpg" 
-alt="OpenSoT + PI" width="480" height="360" border="10" /><br>XBot R-HAL</a>
+alt="OXBot R-HAL" /><br>XBot R-HAL</a>
 
 
