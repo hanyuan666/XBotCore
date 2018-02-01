@@ -46,7 +46,7 @@ bool XBot::XBotCommunicationPlugin::init_control_plugin(XBot::Handle::Ptr handle
     //_robot->getMotorPosition(_qref);
     _robot->getStiffness(_kref);
     _robot->getDamping(_dref);
-    _robot->getJointVelocity(_qdotref);
+    _robot->getVelocityReference(_qdotref);
  
     Logger::warning() << "Filter ON by default, cutoff frequency is " << cutoff_freq << " Hz" << Logger::endl();
 
@@ -68,7 +68,7 @@ void XBot::XBotCommunicationPlugin::on_start(double time)
     _robot->getPositionReference(_q0);
     _robot->getStiffness(_k0);
     _robot->getDamping(_d0);
-    _robot->getJointVelocity(_qdot0);
+    _robot->getVelocityReference(_qdot0);
 
     _filter_q.reset(_q0);
     _filter_k.reset(_k0);
