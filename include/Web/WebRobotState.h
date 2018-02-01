@@ -42,6 +42,11 @@ class WebRobotStateTX {
     std::vector<double> stiffness;
     std::vector<double> damping;
     
+    std::vector<double> position_ref;
+    std::vector<double> vel_ref;
+    std::vector<double> effort_ref;
+    
+    
     //XBot::RobotState::pdo_rx pdo_rx;
     //hand
     //IMU

@@ -86,17 +86,20 @@ CommunicationInterfaceWebServer::CommunicationInterfaceWebServer(XBotInterface::
         }
         
         std::vector<std::string> names = chain->getJointNames();
-        std::vector<std::string> jvals, vref, eref, stiff, damp;
+        std::vector<std::string> jvals, vval, eval, pref, vref, eref, stiff, damp;
         //populate jvals
         
         std::vector <std::string> lowlimit;
         std::vector <std::string> uplimit;
         for( int i=0; i<ids.size();i ++){
           jvals.push_back(std::to_string(chain->getJointPosition(i)));
-          vref.push_back(std::to_string(chain->getJointVelocity(i)));
-          eref.push_back(std::to_string(chain->getJointEffort(i)));
+          vval.push_back(std::to_string(chain->getJointVelocity(i)));
+          eval.push_back(std::to_string(chain->getJointEffort(i)));
           stiff.push_back(std::to_string(chain->getStiffness(i)));
           damp.push_back(std::to_string(chain->getDamping(i)));
+          pref.push_back(std::to_string(chain->getPositionReference(i)));
+          vref.push_back(std::to_string(chain->getVelocityReference(i)));
+          eref.push_back(std::to_string(chain->getEffortReference(i)));
           double llimit, ulimit;
           chain->getJointLimits(i,llimit,ulimit);
           lowlimit.push_back(std::to_string(llimit));
@@ -108,10 +111,13 @@ CommunicationInterfaceWebServer::CommunicationInterfaceWebServer(XBotInterface::
         val.push_back(ids);
         val.push_back(names);
         val.push_back(jvals);
-        val.push_back(vref);
-        val.push_back(eref);
+        val.push_back(vval);
+        val.push_back(eval);
         val.push_back(stiff);
         val.push_back(damp);
+        val.push_back(pref);
+        val.push_back(vref);
+        val.push_back(eref);
         val.push_back(lowlimit);
         val.push_back(uplimit);
         
@@ -128,7 +134,8 @@ void CommunicationInterfaceWebServer::sendRobotState()
     //write to a buffer that the callback handleData will use
     JointIdMap _joint_id_map, _motor_id_map,
     _jvel_id_map,_mvel_id_map, _temp_id_map,
-    _effort_id_map, _stiffnes_id_map,_damping_id_map;
+    _effort_id_map, _stiffnes_id_map,_damping_id_map,
+    pos_ref_id_map, vel_ref_id_map, eff_ref_id_map;
     
     _robot->getJointPosition(_joint_id_map);
     _robot->getMotorPosition(_motor_id_map);
@@ -138,6 +145,10 @@ void CommunicationInterfaceWebServer::sendRobotState()
     _robot->getJointEffort(_effort_id_map);
     _robot->getStiffness(_stiffnes_id_map);
     _robot->getDamping(_damping_id_map);
+    
+    _robot->getPositionReference(pos_ref_id_map);
+    _robot->getVelocityReference(vel_ref_id_map);
+    _robot->getEffortReference(eff_ref_id_map);
     
     WebRobotStateTX rstate;  
     
@@ -154,6 +165,10 @@ void CommunicationInterfaceWebServer::sendRobotState()
         double effval= _effort_id_map.at(id);
         double stiffval= _stiffnes_id_map.at(id);
         double dampval= _damping_id_map.at(id);
+        
+        double pos_ref = pos_ref_id_map.at(id);
+        double vel_ref = vel_ref_id_map.at(id);
+        double eff_ref = eff_ref_id_map.at(id);
                  
         rstate.joint_id.push_back(id);
         rstate.link_position.push_back(jval);
@@ -164,6 +179,10 @@ void CommunicationInterfaceWebServer::sendRobotState()
         rstate.effort.push_back(effval);
         rstate.stiffness.push_back(stiffval);
         rstate.damping.push_back(dampval);
+        
+        rstate.position_ref.push_back(pos_ref);
+        rstate.vel_ref.push_back(vel_ref);
+        rstate.effort_ref.push_back(eff_ref);
     }
     
     if(sharedData->getNumClient().load() <= 0) {

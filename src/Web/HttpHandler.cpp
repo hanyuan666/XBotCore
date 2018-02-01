@@ -104,8 +104,11 @@ void HttpHandler::handleGet(std::shared_ptr<ResponseInterface>& response){
                 std::vector<std::string> ev = inner_map[4];
                 std::vector<std::string> sv = inner_map[5];
                 std::vector<std::string> dv = inner_map[6];
-                std::vector<std::string> llv = inner_map[7];
-                std::vector<std::string> ulv = inner_map[8];
+                std::vector<std::string> pref = inner_map[7];
+                std::vector<std::string> vref = inner_map[8];
+                std::vector<std::string> eref = inner_map[9];                
+                std::vector<std::string> llv = inner_map[10];
+                std::vector<std::string> ulv = inner_map[11];
                 writer.Int(std::stoi(idv[i]));
                 writer.Key("Name");
                 writer.String(nv[i].c_str());
@@ -119,6 +122,12 @@ void HttpHandler::handleGet(std::shared_ptr<ResponseInterface>& response){
                 writer.Double(std::stod(sv[i]));
                 writer.Key("Dval");
                 writer.Double(std::stod(dv[i]));
+                writer.Key("pos_ref");
+                writer.Double(std::stod(pref[i]));
+                writer.Key("vel_ref");
+                writer.Double(std::stod(vref[i]));
+                writer.Key("eff_ref");
+                writer.Double(std::stod(eref[i]));
                 writer.Key("Llimit");
                 writer.Double(std::stod(llv[i]));
                 writer.Key("Ulimit");
