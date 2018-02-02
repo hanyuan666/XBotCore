@@ -22,7 +22,7 @@ The bibtex code for including this citation is provided:
 
 Online documentation: https://advrhumanoids.github.io/XCM/
 
-## Robotic Hardware Abstracion Layer
+## Robotic Hardware Abstraction Layer
 We present a new Robot Hardware
 Abstraction Layer (R-HAL) that permits to seamlessly program
 and control any robotic platform powered by the XBot control
