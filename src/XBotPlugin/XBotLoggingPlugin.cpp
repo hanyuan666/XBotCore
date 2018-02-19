@@ -49,12 +49,12 @@ bool XBot::XBotLoggingPlugin::init_control_plugin( XBot::Handle::Ptr handle )
 
 void XBot::XBotLoggingPlugin::on_start(double time)
 {
-    DPRINTF("Start Logging ...\n");
+    Logger::info() << "Start Logging ...\n" << Logger::endl();
 }
 
 void XBot::XBotLoggingPlugin::on_stop(double time)
 {
-   DPRINTF("Stop Logging ...\n");
+   Logger::info() << "Stop Logging ...\n" << Logger::endl();
 }
 
 
