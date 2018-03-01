@@ -10,10 +10,15 @@ class HALInterface :  public XBot::IXBotJoint,
                       public XBot::IXBotFT,
                       public XBot::IXBotIMU,
                       public XBot::IXBotHand {
+
 public:
     
     typedef std::shared_ptr<HALInterface> Ptr;
-  
+    
+    std::string _hal_name;
+    enum HALType { Robot, Simulator, Dummy};
+    HALType _hal_type;
+    
     virtual void init() = 0;
     virtual int recv_from_slave() = 0;
     virtual int send_to_slave() = 0;   

@@ -83,6 +83,8 @@ protected:
     std::shared_ptr<XBot::IXBotFT>    get_xbotcore_ft();
     std::shared_ptr<XBot::IXBotIMU>   get_xbotcore_imu();
     std::shared_ptr<XBot::IXBotHand>   get_xbotcore_hand();
+    std::string get_hal_name();
+    HALInterface::HALType get_hal_type();
     
     void set_xbotcore_halInterface(std::shared_ptr<HALInterface> halInterface);
     void set_xbotcore_joint(std::shared_ptr<XBot::IXBotJoint> joint);

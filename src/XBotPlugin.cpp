@@ -31,6 +31,16 @@ XBotPlugin::~XBotPlugin()
 
 }
 
+std::string XBotPlugin::get_hal_name(){
+  
+    return _halInterface->_hal_name;
+}
+
+HALInterface::HALType XBotPlugin::get_hal_type(){
+  
+    return _halInterface->_hal_type;
+}
+    
 std::shared_ptr< HALInterface > XBotPlugin::get_xbotcore_halInterface()
 {
     return _halInterface;

@@ -74,10 +74,19 @@ void HomingExample::on_start(double time)
     _robot->sense();
     //_robot->getJointPosition(_q0);
     //we take the previous reference
-    _robot->getPositionReference(_q0);
-    
-   
-    
+    _robot->getPositionReference(_q0);    
+     
+    if (get_hal_type() == HALInterface::HALType::Simulator){      
+      Logger::info() << "HAL Loaded Type simulator" << Logger::endl();
+    }    
+    if (get_hal_type() == HALInterface::HALType::Dummy){      
+      Logger::info() << "HAL Loaded Type dummy" << Logger::endl();
+    }
+    if (get_hal_type() == HALInterface::HALType::Robot){      
+      Logger::info() << "HAL Loaded Type Robot" << Logger::endl();
+    }
+    Logger::info() << "HAL Loaded Name "<< get_hal_name() << Logger::endl();
+        
 // NOTE if you want to grasp use this piece of code    
 //     _robot->setPositionReference(_q0);
 //     
@@ -121,8 +130,6 @@ void HomingExample::control_loop(double time, double period)
 
     // after we arrive in the homing position read head reference from the NRT
     
-    
-
 //     _robot->chain("head").setPositionReference(_pos_ref_map); 
     _robot->move();
 }
