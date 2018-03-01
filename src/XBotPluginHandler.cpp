@@ -511,6 +511,12 @@ void PluginHandler::run()
                 const auto& plugin = _rtplugin_vector[i];
                 _plugin_status[i]->write(XBot::Command("RUNNING"+_plugin_custom_status[i]->getStatus()));
 
+                _plugin_cmd[i]->read((plugin)->getCmd());
+
+                double tic = _time_provider->get_time();
+                (plugin)->run(_time[i], _period[i]);
+                double toc = _time_provider->get_time();
+                
                 if( _plugin_switch[i]->read(cmd) ){
 
                     /* If stop command has been received, set plugin to STOPPED */
@@ -520,12 +526,6 @@ void PluginHandler::run()
                         _plugin_state[i] = "STOPPED";
                     }
                 }
-                
-                _plugin_cmd[i]->read((plugin)->getCmd());
-
-                double tic = _time_provider->get_time();
-                (plugin)->run(_time[i], _period[i]);
-                double toc = _time_provider->get_time();
 
                 XBot::Command cm;
                 (plugin)->setCmd(cm);
