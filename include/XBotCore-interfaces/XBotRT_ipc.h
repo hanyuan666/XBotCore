@@ -32,6 +32,10 @@ int xddp_bind ( const char * label, size_t poolsz );
 
 int xddp_connect ( const char * label );
 
+int iddp_bind ( const char * label, size_t poolsz );
+
+int iddp_connect ( const char * label );
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
