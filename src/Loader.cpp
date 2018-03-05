@@ -57,6 +57,8 @@ void Loader::init_internal()
     }
     
     t.store(false);
+    
+    _pluginHandler->init_plugins();
 }
 
 void Loader::loop_internal()

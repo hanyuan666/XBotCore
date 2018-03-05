@@ -41,14 +41,17 @@ namespace XBot {
 PluginHandler::PluginHandler( RobotInterface::Ptr robot, 
                        TimeProvider::Ptr time_provider,
                        XBot::SharedMemory::Ptr shared_memory,
-                       Options options ) :
+                       Options options,
+                       std::shared_ptr<HALInterface> halInterface
+                            ) :
     _robot(robot),
     _time_provider(time_provider),
     _plugins_set_name(options.xbotcore_pluginhandler_plugin_set_name),
     _esc_utils(robot),
     _close_was_called(false),
     _shared_memory(shared_memory),
-    _options(options)
+    _options(options),
+    _halInterface(halInterface)
 {
     // plugin set mode 
     update_plugins_set_name(_options.xbotcore_pluginhandler_plugin_set_name);
@@ -60,6 +63,7 @@ PluginHandler::PluginHandler( RobotInterface::Ptr robot,
     _pluginhandler_log = XBot::MatLogger::getLogger("/tmp/PluginHandler_log");
     Logger::info() << "With plugin set name : " << _plugins_set_name << Logger::endl();
     
+    init_done.store(false);
     curr_plg.store(-1);
     
     _roshandle_shobj = shared_memory->getSharedObject<RosUtils::RosHandle::Ptr>("ros_handle");
@@ -195,6 +199,8 @@ bool PluginHandler::load_plugins()
     _time.resize(_rtplugin_vector.size());
     _last_time.resize(_rtplugin_vector.size());
     _period.resize(_rtplugin_vector.size());      
+    _plugin_init_success.resize(_rtplugin_vector.size(), false);
+    _first_loop.resize(_rtplugin_vector.size(), true);
     return success;
 }
 
@@ -248,7 +254,6 @@ void XBot::PluginHandler::init_plugin_handle_stdexcept()
 
 }
 
-
 bool PluginHandler::init_plugins(std::shared_ptr<HALInterface> halInterface,
                                  std::shared_ptr< IXBotModel > model)
 {
@@ -265,7 +270,9 @@ bool PluginHandler::init_plugins(std::shared_ptr<HALInterface> halInterface,
        _roshandle.reset( new XBot::RosUtils::RosHandle );  
     }
     
-    _halInterface = halInterface;
+    if (halInterface)
+      _halInterface = halInterface;
+    
     _joint = std::shared_ptr< IXBotJoint> (halInterface);    
     _model = model;
   
@@ -334,6 +341,8 @@ bool PluginHandler::init_plugins(std::shared_ptr<HALInterface> halInterface,
         _plugin_switch[i]->init(_rtplugin_names[i]+"_switch");
         _plugin_status[i]->init(_rtplugin_names[i]+"_status");
     }
+    
+    init_done.store(true);
 
     return ret;
 }
@@ -430,7 +439,8 @@ void PluginHandler::replacePlugin(const std::string& name){
   
     int pos = pluginPos[name];
     curr_plg.store(pos);
-    if( _plugin_state[pos].compare("STOPPED") != 0) {curr_plg.store(-1); return;}
+    if( _plugin_state[pos].compare("STOPPED") != 0) {curr_plg.store(-1); return;};
+   _rtplugin_vector[pos]->close();
     unloadPlugin(name);
     std::shared_ptr<XBot::XBotControlPlugin> plugin_ptr = loadPlugin(name);
     initPlugin(plugin_ptr, name);
@@ -441,6 +451,7 @@ void PluginHandler::replacePlugin(const std::string& name){
 void PluginHandler::run()
 {
      
+    if (init_done.load() == false) return;
     
     // log plugin handler exec time
     double plugin_handler_tic = _time_provider->get_time();
