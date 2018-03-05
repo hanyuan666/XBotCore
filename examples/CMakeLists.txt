@@ -55,9 +55,13 @@ add_library(HomingExample SHARED src/homing_example.cpp)
 add_library(IdExample SHARED src/id_example.cpp)
 add_executable(IpcExampleRT src/example_ipc_rt.cpp)
 add_executable(IpcExampleNRT src/example_ipc_nonrt.cpp)
+add_executable(IpcExampleIDDP1 src/example_iddp1.cpp)
+add_executable(IpcExampleIDDP2 src/example_iddp2.cpp)
 
 if ( Xenomai_FOUND )
     set_xeno_flags(HomingExample)
+    set_xeno_flags(IpcExampleIDDP1)
+    set_xeno_flags(IpcExampleIDDP2)
 endif()
 
 
@@ -69,6 +73,8 @@ target_link_libraries(IdExample XCM)
 target_link_libraries(HomingExample XCM)
 target_link_libraries(IpcExampleNRT XCM ${RT_LIBRARY})
 target_link_libraries(IpcExampleRT XCM ${RT_LIBRARY})
+target_link_libraries(IpcExampleIDDP1 XCM ${RT_LIBRARY})
+target_link_libraries(IpcExampleIDDP2 XCM ${RT_LIBRARY})
 
 
 #############
