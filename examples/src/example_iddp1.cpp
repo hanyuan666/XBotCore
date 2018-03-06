@@ -3,46 +3,81 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <IDDPExample1.h>
+#include <XBotCore/XBotCore.h>
 
-int main(int argc, char **argv){
 
-
-    XBot::PublisherIDDP<Eigen::Vector3d> pub_vec("rt1_to_rt2_vec3d");
-    XBot::PublisherIDDP<XBot::Command> pub_str("rt1_to_rt2_string");
+XBot::IDDPExample1::IDDPExample1() : 
+  sub_vec("rt2_to_rt1_vec3d")
+  
+{
+  
+    int period = 1000;
+      
+    set_thread_name("IDDP1");
+    // set thread period - not periodic
+    task_period_t t;
+    memset(&t, 0, sizeof(t));
+    t.period = {0,period};
+    set_thread_period(t);
     
-    XBot::SubscriberIDDP<Eigen::Vector3d> sub_vec("rt2_to_rt1_vec3d");
-    XBot::SubscriberIDDP<XBot::Command> sub_str("rt2_to_rt1_string");
+    // set thread priority
+    set_thread_priority();
+    
+   
+}
 
-    Eigen::Vector3d vec1, vec2;
-    std::vector<std::string> strings_to_send = {"HELLO THERE!", "I AM", "A HARD-REALTIME 1", "PROCESS", "I AM", "FINE"};
+void XBot::IDDPExample1::set_thread_name(std::string thread_name)
+{
+    // save the thread name
+    this->thread_name = thread_name;
+    // set thread name
+    name = this->thread_name.c_str();
+}
 
+std::string XBot::IDDPExample1::get_thread_name(void)
+{
+    return thread_name;
+}
 
-    for( int it = 0; it < 1e10; it++ ){
+void XBot::IDDPExample1::set_thread_period(task_period_t t)
+{
+    period.task_time = t.task_time;
+    period.period = t.period;
+}
 
+void XBot::IDDPExample1::set_thread_priority()
+{
 
+    // set scheduler policy
+#if defined( __XENO__ ) || defined( __COBALT__ )
+    schedpolicy = SCHED_FIFO;
+    XBot::Logger::warning() << "SCHED_FIFO for IDDPExample1 " <<  XBot::Logger::endl();
+#else
+    schedpolicy = SCHED_OTHER;
+    XBot::Logger::warning() << "SCHED_OTHER for IDDPExample1 " <<  XBot::Logger::endl();
+#endif
+    
+    // set scheduler priority and stacksize
+    priority = sched_get_priority_max(schedpolicy);
+    stacksize = 0; // not set stak size !!!! YOU COULD BECAME CRAZY !!!!!!!!!!!!
+}
 
-        vec1.setConstant(it*2);
-        pub_vec.write(vec1);
+void XBot::IDDPExample1::th_init( void * ){
+    
+}
 
-        std::cout << "RT 1 looping...publishing "<< vec1.transpose() << std::endl;
+void XBot::IDDPExample1::th_loop( void * ){  
+    it++;
 
-        pub_str.write(strings_to_send[it%strings_to_send.size()]);
-
-        if(sub_vec.read(vec2)){
-            std::cout << "RT 1 process: received vector " << vec2.transpose() << std::endl;
-        }
-
-
-        XBot::Command str;
-        if(sub_str.read(str)){
-            std::cout << "RT 1 process: received string " << str.str() << std::endl;
-        }
-
-        usleep(100000);
-
-
+    if(sub_vec.read(vec2)){
+        XBot::Logger::warning() << "RT 1 process: received vector " << vec2.transpose() << XBot::Logger::endl();
     }
 
+   
+}
 
-
+XBot::IDDPExample1::~IDDPExample1() {
+    
+    Logger::info() << "~IDDPExample1()" << Logger::endl();
 }

@@ -3,50 +3,80 @@
 #include <iostream>
 #include <vector>
 #include <string>
-
-void fs(const std::string& s);
-
-void fc(const XBot::Command& c);
-
-int main(int argc, char **argv){
+#include <IDDPExample2.h>
+#include <XBotCore/XBotCore.h>
 
 
+XBot::IDDPExample2::IDDPExample2() : 
+  pub_vec("rt2_to_rt1_vec3d")
+  
+{
+  
+    int period = 1000;
+      
+    set_thread_name("IDDP2");
+    // set thread period - not periodic
+    task_period_t t;
+    memset(&t, 0, sizeof(t));
+    t.period = {0,period};
+    set_thread_period(t);
     
-    XBot::SubscriberIDDP<XBot::Command> sub_str("rt1_to_rt2_string");
-    XBot::SubscriberIDDP<Eigen::Vector3d> sub_vec("rt1_to_rt2_vec3d");
+    // set thread priority
+    set_thread_priority();
     
+   
+}
+
+void XBot::IDDPExample2::set_thread_name(std::string thread_name)
+{
+    // save the thread name
+    this->thread_name = thread_name;
+    // set thread name
+    name = this->thread_name.c_str();
+}
+
+std::string XBot::IDDPExample2::get_thread_name(void)
+{
+    return thread_name;
+}
+
+void XBot::IDDPExample2::set_thread_period(task_period_t t)
+{
+    period.task_time = t.task_time;
+    period.period = t.period;
+}
+
+void XBot::IDDPExample2::set_thread_priority()
+{
+    // set scheduler policy
+#if defined( __XENO__ ) || defined( __COBALT__ )
+    schedpolicy = SCHED_FIFO;
+    XBot::Logger::warning() << "SCHED_FIFO for IDDPExample2 " <<  XBot::Logger::endl();
+#else
+    schedpolicy = SCHED_OTHER;
+    XBot::Logger::warning() << "SCHED_FIFO for IDDPExample2 " <<  XBot::Logger::endl();
+#endif
     
-    XBot::PublisherIDDP<Eigen::Vector3d> pub_vec("rt2_to_rt1_vec3d");
-    XBot::PublisherIDDP<XBot::Command> pub_str("rt2_to_rt1_string");
+    // set scheduler priority and stacksize
+    priority = sched_get_priority_max(schedpolicy);
+    stacksize = 0; // not set stak size !!!! YOU COULD BECAME CRAZY !!!!!!!!!!!!
+}
 
-    Eigen::Vector3d vec1, vec2;
-    std::vector<std::string> strings_to_send = {"HELLO", "I AM", "A HARD-REALTIME 2", "PROCESS", "HOW", "ARE YOU?"};
+void XBot::IDDPExample2::th_init( void * ){
 
+}
 
-    for( int it = 0; it < 1e10; it++ ){
+void XBot::IDDPExample2::th_loop( void * ){  
+    it++;
+    
+//     XBot::Logger::warning() << "RT 2 looping..." << XBot::Logger::endl();
 
-        std::cout << "RT 2 looping..." << std::endl;
+    vec1.setConstant(it);
+    pub_vec.write(vec1);
 
-        vec1.setConstant(it);
-        pub_vec.write(vec1);
+}
 
-        pub_str.write(strings_to_send[it%strings_to_send.size()]);
-
-        if(sub_vec.read(vec2)){
-            std::cout << "RT 2 process: received vector " << vec2.transpose() << std::endl;
-        }
-
-
-        XBot::Command str;
-        if(sub_str.read(str)){
-            std::cout << "RT 2 process: received string " << str.str() << std::endl;
-        }
-
-        usleep(100000);
-
-
-    }
-
-
-
+XBot::IDDPExample2::~IDDPExample2() {
+    
+    Logger::info() << "~IDDPExample2()" << Logger::endl();
 }

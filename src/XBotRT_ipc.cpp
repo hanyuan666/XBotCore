@@ -174,7 +174,7 @@ int iddp_bind ( const char * label, size_t local_poolsz ) {
     return s;
 }
 
-int iddp_connect ( const char * label, size_t local_poolsz ) {
+int iddp_connect ( const char * label ) {
     struct rtipc_port_label plabel;
     struct sockaddr_ipc saddr;
     int s;
