@@ -20,6 +20,8 @@
 #include <XCM/XBotCommunicationHandler.h>
 #include <XCM/IOPluginFactory.h>
 
+#include <XCM/XBotXDDP.h>
+
 #include <XBotInterface/RtLog.hpp>
 
 #include <dirent.h>
@@ -176,14 +178,14 @@ void XBot::CommunicationHandler::th_init(void*)
     }
 
 
-    _xddp_handler = std::make_shared<XBot::XBotXDDP>(_path_to_config);
-    _xddp_handler->init();
+    _ipc_handler = std::make_shared<XBot::XBotXDDP>(_path_to_config);
+    _ipc_handler->init();
 
     XBot::AnyMapPtr anymap = std::make_shared<XBot::AnyMap>();
-    std::shared_ptr<XBot::IXBotJoint> xbot_joint = _xddp_handler;
-    std::shared_ptr<XBot::IXBotFT> xbot_ft = _xddp_handler;
-    std::shared_ptr<XBot::IXBotIMU> xbot_imu = _xddp_handler;
-    std::shared_ptr<XBot::IXBotHand> xbot_hand = _xddp_handler;
+    std::shared_ptr<XBot::IXBotJoint> xbot_joint = _ipc_handler;
+    std::shared_ptr<XBot::IXBotFT> xbot_ft = _ipc_handler;
+    std::shared_ptr<XBot::IXBotIMU> xbot_imu = _ipc_handler;
+    std::shared_ptr<XBot::IXBotHand> xbot_hand = _ipc_handler;
 
     (*anymap)["XBotJoint"] = boost::any(xbot_joint);
     (*anymap)["XBotFT"] = boost::any(xbot_ft);
@@ -202,7 +204,7 @@ void XBot::CommunicationHandler::th_init(void*)
     /* Get a vector of communication interfaces to/from NRT frameworks like ROS, YARP, ... */
 #ifdef USE_ROS_COMMUNICATION_INTERFACE
     Logger::info() << "USE_ROS_COMMUNICATION_INTERFACE found! " << Logger::endl();
-    _ros_communication = std::make_shared<XBot::CommunicationInterfaceROS>(_robot, _xddp_handler, xbot_joint);
+    _ros_communication = std::make_shared<XBot::CommunicationInterfaceROS>(_robot, _ipc_handler, xbot_joint);
     _communication_ifc_vector.push_back( _ros_communication );
 
     if ( _master_communication_interface_name == "ROS" ||
@@ -383,7 +385,7 @@ void XBot::CommunicationHandler::th_loop(void*)
     }
 
     /* Update XDDP (receive from RT) */
-     _xddp_handler->updateRX();
+     _ipc_handler->updateRX();
 
     /* Read robot state from RT layer and update robot */
     _robot->sense(false);
@@ -406,7 +408,7 @@ void XBot::CommunicationHandler::th_loop(void*)
     _robot->move();
     
     /* Update XDDP (send to RT) */
-    _xddp_handler->updateTX();
+    _ipc_handler->updateTX();
     
     /* Publish all pending ROS messages */
     _roshandle->publishAll();

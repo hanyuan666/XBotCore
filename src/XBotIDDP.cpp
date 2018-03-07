@@ -17,25 +17,25 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>
 */
 
-#include <XCM/XBotXDDP.h>
+#include <XCM/XBotIDDP.h>
 
 #include <XBotInterface/Utils.h>
 
-XBot::XBotXDDP::XBotXDDP(std::string config_file) : XBot::XBotIPC(config_file)
+XBot::XBotIDDP::XBotIDDP(std::string config_file) : XBot::XBotIPC(config_file)
 {
    
 }
 
-bool XBot::XBotXDDP::init()
+bool XBot::XBotIDDP::init()
 {
     // motors
     for(auto& c : robot) {
         for(int i=0; i< c.second.size(); i++) {
 
-            XBot::SubscriberNRT<XBot::RobotState> subscriber_rx(std::string("Motor_id_") + std::to_string(c.second[i]).c_str());
+            XBot::SubscriberIDDP<XBot::RobotState> subscriber_rx(std::string("Motor_id_") + std::to_string(c.second[i]).c_str());
             fd_read[c.second[i]] = subscriber_rx;
 
-            XBot::PublisherNRT<XBot::RobotState::pdo_tx> publisher_tx(std::string("rt_in_Motor_id_") + std::to_string(c.second[i]).c_str());
+            XBot::PublisherIDDP<XBot::RobotState::pdo_tx> publisher_tx(std::string("rt_in_Motor_id_") + std::to_string(c.second[i]).c_str());
             fd_write[c.second[i]] = publisher_tx;
 
             // initialize the pdo_motor
@@ -52,7 +52,7 @@ bool XBot::XBotXDDP::init()
     //ft
     for(auto& ft_j : ft) {
         // initialize all the fd reading for the ft
-        XBot::SubscriberNRT<XBot::RobotFT::pdo_rx> subscriber_ft(std::string("Ft_id_") + std::to_string(ft_j.second).c_str());
+        XBot::SubscriberIDDP<XBot::RobotFT::pdo_rx> subscriber_ft(std::string("Ft_id_") + std::to_string(ft_j.second).c_str());
         fd_ft_read[ft_j.second] = subscriber_ft;
         
         // initialize the pdo_ft
@@ -68,7 +68,7 @@ bool XBot::XBotXDDP::init()
     //imu
     for(auto& imu_j : imu) {
         // initialize all the fd reading for the imu
-        XBot::SubscriberNRT<XBot::RobotIMU::pdo_rx> subscriber_imu(std::string("Imu_id_") + std::to_string(imu_j.second).c_str());
+        XBot::SubscriberIDDP<XBot::RobotIMU::pdo_rx> subscriber_imu(std::string("Imu_id_") + std::to_string(imu_j.second).c_str());
         fd_imu_read[imu_j.second] = subscriber_imu;
         
         // initialize the pdo_IMU
@@ -85,10 +85,10 @@ bool XBot::XBotXDDP::init()
     //hand
     for(auto& hand_j : hand) {
         // initialize all the fd reading/writing for the hands
-        XBot::SubscriberNRT<XBot::RobotState> subscriber_rx(std::string("Motor_id_") + std::to_string(hand_j.second).c_str());
+        XBot::SubscriberIDDP<XBot::RobotState> subscriber_rx(std::string("Motor_id_") + std::to_string(hand_j.second).c_str());
         fd_read[hand_j.second] = subscriber_rx;
 
-        XBot::PublisherNRT<XBot::RobotState::pdo_tx> publisher_tx(std::string("rt_in_Motor_id_") + std::to_string(hand_j.second).c_str());
+        XBot::PublisherIDDP<XBot::RobotState::pdo_tx> publisher_tx(std::string("rt_in_Motor_id_") + std::to_string(hand_j.second).c_str());
         fd_write[hand_j.second] = publisher_tx;
 
         // initialize the pdo_motor
@@ -104,25 +104,25 @@ bool XBot::XBotXDDP::init()
     return true;
 }
 
-void XBot::XBotXDDP::updateTX()
+void XBot::XBotIDDP::updateTX()
 {
     // Motor + hands
     for( auto& f: fd_read) {
 
-        // write to the NRT publisher to command the RobotStateTX in the pdo_motor buffer
+        // write to the IDDP publisher to command the RobotStateTX in the pdo_motor buffer
         XBot::RobotState::pdo_tx actual_pdo_tx = pdo_motor.at(f.first)->RobotStateTX;
         fd_write.at(f.first).write(actual_pdo_tx);
 
     }
 }
 
-void XBot::XBotXDDP::updateRX()
+void XBot::XBotIDDP::updateRX()
 {
     // Motor + hands
     for( auto& f: fd_read) {
         // NOTE the single joint element can only be controlled by either the RT or the N-RT!
 
-        // reading from the NRT subscriber pipes to update the RobotStateRX in the pdo_motor buffer
+        // reading from the IDDP subscriber pipes to update the RobotStateRX in the pdo_motor buffer
         fd_read.at(f.first).read(*pdo_motor.at(f.first));
     }
     
@@ -137,8 +137,8 @@ void XBot::XBotXDDP::updateRX()
     }
 }
 
-XBot::XBotXDDP::~XBotXDDP()
+XBot::XBotIDDP::~XBotIDDP()
 {
-//     Logger::info() << "~XBotXDDP()" << Logger::endl();
+//     Logger::info() << "~XBotIDDP()" << Logger::endl();
 }
 
