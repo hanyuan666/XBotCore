@@ -221,7 +221,7 @@ namespace XBot{
          * @param _pool_size local pool size: memory needed to convey datagrams will be pulled from this pool, instead of Xenomai's system pool. 
          * 
          */
-        IDDP_pipe (  bool is_publisher, int _pool_size = 8192 ) : pool_size ( _pool_size ) { this->is_publisher = is_publisher; fd = 0; }
+        IDDP_pipe (  bool is_publisher, int _pool_size = 8192*2 ) : pool_size ( _pool_size ) { this->is_publisher = is_publisher; fd = 0; }
 
         /**
          * @brief Getter for the IDDP pipe file descriptor.
@@ -250,6 +250,7 @@ namespace XBot{
                         fd = iddp_bind ( pipe_name.c_str(), pool_size );
                     }
                     else {
+                        Logger::warning() << "Trying to connect on IDDP pipe named: " << pipe_name << Logger::endl();
                         fd = iddp_connect ( pipe_name.c_str() );
                     }
             #else
@@ -289,7 +290,12 @@ namespace XBot{
         template<typename IddpTxTypes>
         int iddp_write ( const IddpTxTypes & tx ) {
             if ( fd <= 0 ) { return 0; }
+        #if defined( __XENO__ ) || defined( __COBALT__ )
+            return send ( fd, ( void* ) &tx, sizeof ( tx ), 0 );
+        #else
             return write ( fd, ( void* ) &tx, sizeof ( tx ) );
+        #endif
+            
         }
 
         /**
@@ -302,11 +308,15 @@ namespace XBot{
          */
         int iddp_write ( const uint8_t * buffer, int size ) {
             if ( fd <= 0 ) { return 0; }
+        #if defined( __XENO__ ) || defined( __COBALT__ )
+            return send ( fd, ( void* ) buffer, size, 0 );
+        #else
             return write ( fd, ( void* ) buffer, size );
+        #endif
         }
 
         /**
-         * @brief template XDDP pipe non-blocking read function: it recvfrom (XENOMAI) or reads rx data on the fd linked to the pipe
+         * @brief template IDDP pipe non-blocking read function: it recvfrom (XENOMAI) or reads rx data on the fd linked to the pipe
          * 
          * @param rx XddpRxTypes to read
          * @return int bytes read
