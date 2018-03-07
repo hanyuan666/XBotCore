@@ -146,10 +146,10 @@ int iddp_bind ( const char * label, size_t local_poolsz ) {
      * convey datagrams will be pulled from this pool, instead of
      * Xenomai's system pool.
      */
-//     if ( local_poolsz > 0 ) {
-//         if ( setsockopt ( s, SOL_XDDP, IDDP_POOLSZ, &local_poolsz, sizeof ( local_poolsz ) ) )
-//             fail ( "setsockopt iddp_poolsz" );
-//     }
+    if ( local_poolsz > 0 ) {
+        if ( setsockopt ( s, SOL_IDDP, IDDP_POOLSZ, &local_poolsz, sizeof ( local_poolsz ) ) )
+            fail ( "setsockopt iddp_poolsz" ); 
+    }
 
     /*
      * Bind the socket to the port, to setup a proxy to channel
@@ -198,7 +198,7 @@ int iddp_connect ( const char * label ) {
     saddr.sipc_family = AF_RTIPC;
     saddr.sipc_port = -1;
     if ( connect ( s, ( struct sockaddr * ) &saddr, sizeof ( saddr ) ) ) {
-        printf("Error %s %s\n", __FUNCTION__, label);
+        printf("Error %s %s - Errno-> %d\n", __FUNCTION__, label, errno);
         fail ( "connect" );
     }
 
