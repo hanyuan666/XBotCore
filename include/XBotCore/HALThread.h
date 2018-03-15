@@ -107,9 +107,12 @@ protected:
     virtual int read() = 0;
     virtual int write() = 0;       
     
-    void set_robot_state(float* jnt, float* torq, float* stiff = nullptr, float* damp = nullptr);
+    void set_robot_state(const double* jnt, const double* torq, const double* stiff = nullptr, const double* damp = nullptr);
+    void get_robot_state(double* jnt, double* torq, double* stiff, double* damp);
+    void set_robot_jnt_ref(const double* jntref);
+    void set_robot_state(const float* jnt, const float* torq, const float* stiff = nullptr, const float* damp = nullptr);
     void get_robot_state(float* jnt, float* torq, float* stiff, float* damp);
-    void set_robot_jnt_ref(float* jntref);
+    void set_robot_jnt_ref(const float* jntref);
     
     // NOTE IXBotHand getters/setters
     virtual double get_grasp_state(int hand_id);
@@ -148,9 +151,9 @@ protected:
     
     virtual bool get_gains(int joint_id, std::vector< double >& gain_vector) final;
     
-    virtual bool get_vel_ref(int joint_id, double& vel_ref);
+    virtual bool get_vel_ref(int joint_id, double& vel_ref)final;
     
-    virtual bool get_tor_ref(int joint_id, double& tor_ref);
+    virtual bool get_tor_ref(int joint_id, double& tor_ref)final;
     
     // NOTE IXBotJoint setters
     virtual bool set_pos_ref(int joint_id, const double& pos_ref) final;

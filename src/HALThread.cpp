@@ -248,7 +248,7 @@ XBot::HALThread::~HALThread() {
     this->join();
 }
 
-void XBot::HALThread::get_robot_state(float* jnt, float* torq, float* stiff, float* damp)
+void XBot::HALThread::get_robot_state(double* jnt, double* torq, double* stiff, double* damp)
 {
     pthread_mutex_lock( &w_mutex );
     for( int n=0; n<num_joint; n++){
@@ -260,7 +260,7 @@ void XBot::HALThread::get_robot_state(float* jnt, float* torq, float* stiff, flo
     pthread_mutex_unlock( & w_mutex );  
 }
 
-void XBot::HALThread::set_robot_state(float* jnt, float* torq, float* stiff, float* damp)
+void XBot::HALThread::set_robot_state(const double* jnt, const double* torq, const double* stiff, const double* damp)
 {
     pthread_mutex_lock( &mutex );    
     for (int t=0; t<num_joint; t++){
@@ -274,7 +274,7 @@ void XBot::HALThread::set_robot_state(float* jnt, float* torq, float* stiff, flo
     pthread_mutex_unlock( &mutex );  
 }
 
-void XBot::HALThread::set_robot_jnt_ref(float* jntref)
+void XBot::HALThread::set_robot_jnt_ref(const double* jntref)
 {
     for (int t=0; t<num_joint; t++){
       _shjointRefMap[t] = jntref[t];
@@ -282,6 +282,39 @@ void XBot::HALThread::set_robot_jnt_ref(float* jntref)
     } 
 }
 
+void XBot::HALThread::get_robot_state(float* jnt, float* torq, float* stiff, float* damp)
+{
+    pthread_mutex_lock( &w_mutex );
+    for( int n=0; n<num_joint; n++){
+      jnt[n] = _shjointRefMap[n];
+      torq[n] = _shtorqueRefMap[n];
+      stiff[n] = _shgainMap[n][0];
+      damp[n] = _shgainMap[n][1];
+    }
+    pthread_mutex_unlock( & w_mutex );  
+}
+
+void XBot::HALThread::set_robot_state(const float* jnt, const float* torq, const float* stiff, const float* damp)
+{
+    pthread_mutex_lock( &mutex );    
+    for (int t=0; t<num_joint; t++){
+      _shjointValMap[t] = jnt[t];
+      _shtorqueValMap[t] = torq[t];
+      if(stiff!= nullptr)
+      _shgainRefMap[t][0] = stiff[t];
+      if(damp!= nullptr)
+      _shgainRefMap[t][1] = damp[t];
+    }   
+    pthread_mutex_unlock( &mutex );  
+}
+
+void XBot::HALThread::set_robot_jnt_ref(const float* jntref)
+{
+    for (int t=0; t<num_joint; t++){
+      _shjointRefMap[t] = jntref[t];
+      _jointRefMap[t] = jntref[t];
+    } 
+}
 ////////////////////////////////////
 ////////////////////////////////////
 // SINGLE JOINT PRIVATE FUNCTIONS //
