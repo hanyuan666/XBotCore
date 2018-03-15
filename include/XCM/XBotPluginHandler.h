@@ -29,8 +29,6 @@
 #include <XCM/TimeProvider.h>
 #include <XCM/XBotESCUtils.h>
 
-#include <SharedLibraryClassFactory.h>
-#include <SharedLibraryClass.h>
 #include <XCM/XBotPluginStatus.h>
 
 #include <XBotCore-interfaces/XBotHandle.h>

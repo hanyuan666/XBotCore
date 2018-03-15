@@ -20,6 +20,20 @@ The bibtex code for including this citation is provided:
 }
 ~~~
 
+~~~
+Giuseppe F. Rigano, Luca Muratore, Arturo Laurenzi, Enrico Mingo Hoffman, Nikos G Tsagarakis "Towards A Robot Hardware Abstraction Layer (R-HAL) Leveraging the XBot Software Framework", IEEE International Conference on Robotic Computing (IRC18), 2018.
+~~~
+
+The bibtex code for including this citation is provided:
+~~~
+@inproceedings{rigano_hal,
+  title={Towards A Robot Hardware Abstraction Layer (R-HAL) Leveraging the XBot Software Framework},
+  author={Rigano, G.F. and Muratore, L. and Laurenzi, A. and Hoffman, E.M. and Tsagarakis, N.G.},
+  booktitle={IEEE International Conference on Robotic Computing, IRC18 (to appear)},
+  year={2018}
+}
+~~~
+
 Online documentation: https://advrhumanoids.github.io/XCM/
 
 ## Robotic Hardware Abstraction Layer
