@@ -47,7 +47,9 @@ namespace XBot {
         PluginHandler( RobotInterface::Ptr robot, 
                        TimeProvider::Ptr time_provider,
                        XBot::SharedMemory::Ptr shared_memory,
-                       Options options);
+                       Options options,
+                       std::shared_ptr<HALInterface> halInterface = nullptr
+                     );
         
         void update_plugins_set_name(const std::string& plugins_set_name);
 
@@ -157,6 +159,7 @@ namespace XBot {
         RobotInterface::Ptr _robot;
         std::string _path_to_cfg;
 
+        std::atomic<bool> init_done;
         XBot::MatLogger::Ptr _pluginhandler_log;
         
         std::string _plugins_set_name;

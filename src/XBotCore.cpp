@@ -153,11 +153,11 @@ void XBot::XBotCore::init_internal()
     }
     
     // create plugin handler
-    _pluginHandler = std::make_shared<XBot::PluginHandler>(_robot, _time_provider, _shmem, _options);
+    _pluginHandler = std::make_shared<XBot::PluginHandler>(_robot, _time_provider, _shmem, _options, hal);
 
     _pluginHandler->load_plugins();
     
-    _pluginHandler->init_plugins(hal);
+    //_pluginHandler->init_plugins(hal);
     
     loaderptr = std::make_shared<Loader>(_pluginHandler);
     loaderth = new XBot::XBotLoaderThread();
