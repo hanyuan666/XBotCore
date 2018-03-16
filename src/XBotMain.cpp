@@ -63,6 +63,16 @@ bool getDefaultConfig(std::string& config)
     return true;
 }
 
+bool getLowLevelConfig( const YAML::Node& root_cfg, YAML::Node& low_level_config_yaml ) {
+    if(root_cfg["XBotCore"]) {
+        YAML::Node x_bot_core = root_cfg["XBotCore"];
+        if(x_bot_core["config_path"]) {
+            low_level_config_yaml = YAML::LoadFile(XBot::Utils::computeAbsolutePath(x_bot_core["config_path"].as<std::string>()));
+            return true;
+        }
+    }
+    return false;
+}
 ////////////////////////////////////////////////////
 // Main
 ////////////////////////////////////////////////////
@@ -154,8 +164,40 @@ int main(int argc, char *argv[]) try {
         
     }
 
-
+    // log config file info
     Logger::info(Logger::Severity::HIGH) << XBot::bold_on << "XBotCore using config file " << path_to_cfg << Logger::endl();
+    
+    // set SCP log parameters if enabled
+    YAML::Node config_file = YAML::LoadFile(path_to_ch_cfg);
+    YAML::Node low_level_config_file;
+    std::string remote_username, remote_ip_address, remote_log_folder_path;
+
+    // trying to read from low level log the SCP log parameters
+    if( getLowLevelConfig(config_file, low_level_config_file) ) {
+
+        if( low_level_config_file["SCPLog"]["remote_username"] &&
+            low_level_config_file["SCPLog"]["remote_ip_address"] &&
+            low_level_config_file["SCPLog"]["remote_log_folder_path"]
+        ) {
+            remote_username = low_level_config_file["SCPLog"]["remote_username"].as<std::string>();
+            remote_ip_address = low_level_config_file["SCPLog"]["remote_ip_address"].as<std::string>();
+            remote_log_folder_path = low_level_config_file["SCPLog"]["remote_log_folder_path"].as<std::string>();
+            
+            XBot::MatLogger::SetSCPLogParameters(remote_username, remote_ip_address, remote_log_folder_path);
+            
+            Logger::info(Logger::Severity::HIGH) << XBot::bold_on << "XBotCore using SCP log with the following parameters " << Logger::endl();
+            Logger::info(Logger::Severity::HIGH) << "remote_username : " << remote_username << Logger::endl();
+            Logger::info(Logger::Severity::HIGH) << "remote_ip_address : " << remote_ip_address << Logger::endl();
+            Logger::info(Logger::Severity::HIGH) << "remote_log_folder_path : " << remote_log_folder_path << Logger::endl();
+        }
+        else {
+            Logger::warning() << "Error while trying to read the SCP log parameters: SCP log disabled" << Logger::endl();
+        }
+       
+    }
+    else {
+        Logger::warning() << "Error while trying to read the low level config file: SCP log disabled" << Logger::endl();
+    }
 
     main_common(shutdown);
 

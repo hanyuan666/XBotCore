@@ -71,6 +71,8 @@ namespace XBot {
         
         void replacePlugin(const std::string& name);
 
+        bool isRealTime();
+
         std::vector<std::string>& getPluginsName();
         
         virtual const std::string& getPathToConfigFile() const;
