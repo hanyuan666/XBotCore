@@ -84,6 +84,11 @@ void XBot::PluginHandler::update_plugins_set_name(const std::string& plugins_set
     }
 }
 
+bool XBot::PluginHandler::isRealTime(){
+  
+  return _is_RT_plugin_handler;
+}
+
 std::vector<std::string>& PluginHandler::getPluginsName()
 {
   
