@@ -107,21 +107,21 @@ protected:
     virtual int read() = 0;
     virtual int write() = 0;       
     
-    void set_robot_state(const double* jnt, const double* torq, const double* stiff = nullptr, const double* damp = nullptr);
-    void get_robot_state(double* jnt, double* torq, double* stiff, double* damp);
+    void set_robot_state(const double* jnt, const double* torq, const double* vel, const double* stiff = nullptr, const double* damp = nullptr);
+    void get_robot_state(double* jnt, double* torq, double* vel, double* stiff, double* damp);
     void set_robot_jnt_ref(const double* jntref);
-    void set_robot_state(const float* jnt, const float* torq, const float* stiff = nullptr, const float* damp = nullptr);
-    void get_robot_state(float* jnt, float* torq, float* stiff, float* damp);
-    void set_robot_jnt_ref(const float* jntref);
+    void set_robot_state(const float* jnt, const float* torq, const float* vel, const float* stiff = nullptr, const float* damp = nullptr);
+    void get_robot_state(float* jnt, float* torq, float* vel, float* stiff, float* damp);
+    void set_robot_jnt_ref(const float* jntref);;
     
     // NOTE IXBotHand getters/setters
     virtual double get_grasp_state(int hand_id);
     virtual bool   grasp(int hand_id, double grasp_percentage);
     
     // NOTE IXBotFT getters
-    virtual bool get_ft(int ft_id, std::vector< double >& ft, int channels = 6) final;
-    virtual bool get_ft_fault(int ft_id, double& fault) final;
-    virtual bool get_ft_rtt(int ft_id, double& rtt) final;
+    virtual bool get_ft(int ft_id, std::vector< double >& ft, int channels = 6);
+    virtual bool get_ft_fault(int ft_id, double& fault);
+    virtual bool get_ft_rtt(int ft_id, double& rtt);
     
     // NOTE IXBotIMU getters
     virtual bool get_imu(int imu_id, std::vector< double >& lin_acc, std::vector< double >& ang_vel, std::vector< double >& quaternion);

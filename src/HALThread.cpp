@@ -191,10 +191,6 @@ void XBot::HALThread::init(){
     pthread_mutex_init(&w_mutex, NULL);
     pthread_mutex_init(&mutex, NULL);
     pthread_cond_init( &cond, NULL);
-    for( int n=0; n<num_joint; n++){
-        _jointValMap[n] = 0.0;
-        _jointRefMap[n] = 0.0;
-        }
     this->create(true,1);
     recv_from_slave();
 }
@@ -248,24 +244,34 @@ XBot::HALThread::~HALThread() {
     this->join();
 }
 
-void XBot::HALThread::get_robot_state(double* jnt, double* torq, double* stiff, double* damp)
+void XBot::HALThread::get_robot_state(double* jnt, double* torq, double* vel, double* stiff, double* damp)
 {
     pthread_mutex_lock( &w_mutex );
     for( int n=0; n<num_joint; n++){
-      jnt[n] = _shjointRefMap[n];
-      torq[n] = _shtorqueRefMap[n];
-      stiff[n] = _shgainMap[n][0];
-      damp[n] = _shgainMap[n][1];
+      if(jnt != nullptr)
+        jnt[n] = _shjointRefMap[n];
+      if(torq != nullptr)
+        torq[n] = _shtorqueRefMap[n];
+      if(vel != nullptr)
+        vel[n] = _shvelRefMap[n];
+      if(stiff != nullptr)
+        stiff[n] = _shgainMap[n][0];
+      if(damp != nullptr)
+        damp[n] = _shgainMap[n][1];
     }
     pthread_mutex_unlock( & w_mutex );  
 }
 
-void XBot::HALThread::set_robot_state(const double* jnt, const double* torq, const double* stiff, const double* damp)
+void XBot::HALThread::set_robot_state(const double* jnt, const double* torq, const double* vel, const double* stiff, const double* damp)
 {
     pthread_mutex_lock( &mutex );    
     for (int t=0; t<num_joint; t++){
-      _shjointValMap[t] = jnt[t];
-      _shtorqueValMap[t] = torq[t];
+      if(jnt != nullptr)
+        _shjointValMap[t] = jnt[t];
+      if(torq != nullptr)
+        _shtorqueValMap[t] = torq[t];
+      if( vel != nullptr)
+        _shvelValMap[t] = vel[t];
       if(stiff!= nullptr)
       _shgainRefMap[t][0] = stiff[t];
       if(damp!= nullptr)
@@ -276,30 +282,41 @@ void XBot::HALThread::set_robot_state(const double* jnt, const double* torq, con
 
 void XBot::HALThread::set_robot_jnt_ref(const double* jntref)
 {
+   if (jntref != nullptr)
     for (int t=0; t<num_joint; t++){
       _shjointRefMap[t] = jntref[t];
       _jointRefMap[t] = jntref[t];
     } 
 }
 
-void XBot::HALThread::get_robot_state(float* jnt, float* torq, float* stiff, float* damp)
+void XBot::HALThread::get_robot_state(float* jnt, float* torq, float* vel, float* stiff, float* damp)
 {
     pthread_mutex_lock( &w_mutex );
     for( int n=0; n<num_joint; n++){
-      jnt[n] = _shjointRefMap[n];
-      torq[n] = _shtorqueRefMap[n];
-      stiff[n] = _shgainMap[n][0];
-      damp[n] = _shgainMap[n][1];
+      if(jnt != nullptr)
+        jnt[n] = _shjointRefMap[n];
+      if(torq != nullptr)
+        torq[n] = _shtorqueRefMap[n];
+      if(vel != nullptr)
+        vel[n] = _shvelRefMap[n];
+      if(stiff != nullptr)
+        stiff[n] = _shgainMap[n][0];
+      if(damp != nullptr)
+        damp[n] = _shgainMap[n][1];
     }
     pthread_mutex_unlock( & w_mutex );  
 }
 
-void XBot::HALThread::set_robot_state(const float* jnt, const float* torq, const float* stiff, const float* damp)
+void XBot::HALThread::set_robot_state(const float* jnt, const float* torq, const float* vel, const float* stiff, const float* damp)
 {
     pthread_mutex_lock( &mutex );    
     for (int t=0; t<num_joint; t++){
-      _shjointValMap[t] = jnt[t];
-      _shtorqueValMap[t] = torq[t];
+      if(jnt != nullptr)
+        _shjointValMap[t] = jnt[t];
+      if(torq != nullptr)
+        _shtorqueValMap[t] = torq[t];
+      if( vel != nullptr)
+        _shvelValMap[t] = vel[t];
       if(stiff!= nullptr)
       _shgainRefMap[t][0] = stiff[t];
       if(damp!= nullptr)
@@ -310,10 +327,11 @@ void XBot::HALThread::set_robot_state(const float* jnt, const float* torq, const
 
 void XBot::HALThread::set_robot_jnt_ref(const float* jntref)
 {
-    for (int t=0; t<num_joint; t++){
-      _shjointRefMap[t] = jntref[t];
-      _jointRefMap[t] = jntref[t];
-    } 
+    if (jntref != nullptr)
+      for (int t=0; t<num_joint; t++){
+        _shjointRefMap[t] = jntref[t];
+        _jointRefMap[t] = jntref[t];
+      } 
 }
 ////////////////////////////////////
 ////////////////////////////////////
