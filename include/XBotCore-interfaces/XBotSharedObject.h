@@ -62,6 +62,9 @@ public:
 
     const std::string& getName() const;
 
+    Mutex::Ptr get_mutex() const;
+    
+    std::shared_ptr<T> get_object_ptr() const;
 
 
 protected:
@@ -149,6 +152,18 @@ template< typename T >
 SharedObject<T>::operator bool () const 
 {
     return _obj && _mtx && (_name != "");
+}
+
+template< typename T >
+Mutex::Ptr SharedObject<T>::get_mutex() const
+{
+    return _mtx;
+}
+
+template< typename T >
+std::shared_ptr< T > SharedObject<T>::get_object_ptr() const
+{
+    return _obj;
 }
 
 

@@ -77,8 +77,7 @@ endif()
 # find first YCM in order to have ${YCM_MODULE_PATH} defined for 3rd party software like Eigen3
 find_package(YCM REQUIRED)
 find_package(XBotInterface REQUIRED)
-find_package(XBotCoreModel REQUIRED)
-find_package(catkin QUIET COMPONENTS roscpp sensor_msgs std_srvs message_generation robot_state_publisher)
+find_package(catkin QUIET COMPONENTS roscpp sensor_msgs std_srvs message_generation robot_state_publisher srdfdom_advr)
 find_package(YARP QUIET)
 find_package(kdl_parser REQUIRED)
 find_package(Boost REQUIRED COMPONENTS program_options)
@@ -296,16 +295,14 @@ if ( Xenomai_FOUND )
     set_xeno_flags(XBotCoreThread)
 endif()
 
-target_link_libraries(${PROJECT_NAME} ${COMMON_LIBS}
-                                      ${XBotCoreModel_LIBRARIES}                                      
+target_link_libraries(${PROJECT_NAME} ${COMMON_LIBS}                                  
                                       XBotCoreThread
                                       ${Boost_LIBRARIES}
                                       )
 
                                       
                                       
-target_link_libraries(XBotCoreThread    ${COMMON_LIBS}
-                                        ${XBotCoreModel_LIBRARIES}     
+target_link_libraries(XBotCoreThread    ${COMMON_LIBS}    
                                         XCM
                                         ) 
                                         
@@ -316,17 +313,17 @@ ycm_library_install(XBotCoreThread 1 0 0)
 ycm_library_install(XBotCore 1 0 0)
 
 add_executable(DummyMain src/DummyMain.cpp)
-target_link_libraries(DummyMain XCM ${Boost_LIBRARIES})
+target_link_libraries(DummyMain XCM ${Boost_LIBRARIES} ${COMMON_LIBS})
 # target_link_libraries(DummyMain webserver )
 ycm_library_install(DummyMain 1 0 0)
 
 add_executable(CommunicationHandler src/XBotCommunicationMain.cpp)
-target_link_libraries(CommunicationHandler XCM ${COMMUNICATION_INTERFACE_LIBRARIES})
+target_link_libraries(CommunicationHandler XCM ${COMMUNICATION_INTERFACE_LIBRARIES} ${COMMON_LIBS})
 # target_link_libraries(CommunicationHandler webserver )
 ycm_library_install(CommunicationHandler 1 0 0)
 
 add_executable(NRTDeployer src/NRTDeployer.cpp src/NRTDeployerMain.cpp)
-target_link_libraries(NRTDeployer XCM_no_xeno ${Boost_LIBRARIES})
+target_link_libraries(NRTDeployer XCM_no_xeno ${Boost_LIBRARIES} ${COMMON_LIBS})
 # target_link_libraries(NRTDeployer webserver )
 ycm_library_install(NRTDeployer 1 0 0)
 

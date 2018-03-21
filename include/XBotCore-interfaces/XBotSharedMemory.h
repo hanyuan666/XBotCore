@@ -73,8 +73,11 @@ public:
 protected:
 
 private:
+    
+    mutable XBot::Mutex _mtx;
 
     std::map<std::string, boost::any> _obj_map;
+    
 
 };
 
@@ -82,7 +85,8 @@ private:
 template <typename T>
 inline SharedObject<T> SharedMemory::getSharedObject(const std::string& object_name)
 {
-
+    std::lock_guard<XBot::Mutex> lock_guard(_mtx);
+    
     if( _obj_map.count(object_name) == 0 ){
         
         _obj_map[object_name] = boost::any(SharedObject<T>(object_name));
@@ -104,7 +108,14 @@ inline SharedObject<T> SharedMemory::getSharedObject(const std::string& object_n
 
 inline bool SharedMemory::hasObject(const std::string& object_name) const
 {
-    return _obj_map.find(object_name) != _obj_map.end();
+    if(_mtx.try_lock())
+    {
+        return _obj_map.find(object_name) != _obj_map.end();
+    }
+    else
+    {
+        return false;
+    }
 }
 
 

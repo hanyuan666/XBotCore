@@ -195,7 +195,6 @@ void CommunicationInterfaceROS::load_ros_message_interfaces() {
     _jointstate_message_type = ros_interface_root["jointstate_message_type"].as<std::string>();
 
     const YAML::Node &ctrl_msg_root = core_cfg[_control_message_type];
-    _control_message_factory_name = ctrl_msg_root["subclass_factory_name"].as<std::string>();
     _control_message_class_name = ctrl_msg_root["subclass_name"].as<std::string>();
     _control_message_path_to_so = ctrl_msg_root["path_to_shared_lib"].as<std::string>();
 
@@ -216,7 +215,6 @@ void CommunicationInterfaceROS::load_ros_message_interfaces() {
     
 
     const YAML::Node &jointstate_msg_root = core_cfg[_jointstate_message_type];
-    _jointstate_message_factory_name = jointstate_msg_root["subclass_factory_name"].as<std::string>();
     _jointstate_message_class_name = jointstate_msg_root["subclass_name"].as<std::string>();
     _jointstate_message_path_to_so = jointstate_msg_root["path_to_shared_lib"].as<std::string>();
 
