@@ -287,6 +287,7 @@ add_library(XBotCoreThread SHARED
     src/HALInterfaceFactory.cpp
     src/signal_handler.cpp
     src/XBotLoaderThread.cpp
+    src/HALThread.cpp
 )
 
 if ( Xenomai_FOUND )
