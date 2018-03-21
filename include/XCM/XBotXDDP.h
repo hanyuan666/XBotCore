@@ -33,7 +33,7 @@
 
 #include <XBotCore-interfaces/XDomainCommunication.h>
 
-#include <XBotCoreModel.h>
+#include <XBotCoreModel/XBotCoreModel.h>
 
 namespace XBot
 {
