@@ -115,22 +115,22 @@ void XBot::XBotIDDPExample::th_loop( void * ){
     /////////////////////////////////////////////
     // SPEAKS WITH THE OTHER OROCOS COMPONENTS //
     /////////////////////////////////////////////
-    
-
-    
-    
-    // go to homing
-    if( (_time - _first_loop_time) <= _homing_time ) {
-        _q = _q0 + 0.5*(1-std::cos(3.1415*(_time - _first_loop_time)/_homing_time))*(_q_home-_q0);
-        _robot->setPositionReference(_q);
-//         _robot->move();
-//         return;
-            XBot::Logger::warning() << "I am alive! " << _q << XBot::Logger::endl();
-    }
-    _time+=0.005;
-    
-    
-     XBot::Logger::error() << "OUT OF HOMING! " << _time << XBot::Logger::endl();
+// // /*    
+// // 
+// //     
+// //     
+// //     // go to homing
+// //     if( (_time - _first_loop_time) <= _homing_time ) {
+// //         _q = _q0 + 0.5*(1-std::cos(3.1415*(_time - _first_loop_time)/_homing_time))*(_q_home-_q0);
+// //         _robot->setPositionReference(_q);
+// // //         _robot->move();
+// // //         return;
+// //             XBot::Logger::warning() << "I am alive! " << _q << XBot::Logger::endl();
+// //     }
+// //     _time+=0.005;
+// //     
+// //     
+// //      XBot::Logger::error() << "OUT OF HOMING! " << _time << XBot::Logger::endl();*/
     
     
     /* Send received commands to the RT layer (XBotCommunicationRT plugin) */
