@@ -16,7 +16,7 @@ public:
     typedef std::shared_ptr<HALInterface> Ptr;
     
     std::string _hal_name;
-    enum HALType { Robot, Simulator, Dummy};
+    enum HALType { Robot, Simulator, Dummy, NRT};
     HALType _hal_type;
     
     virtual void init() = 0;

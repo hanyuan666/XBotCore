@@ -33,11 +33,12 @@ XBotPlugin::~XBotPlugin()
 
 std::string XBotPlugin::get_hal_name(){
   
+    if(!_halInterface) return "NRT";
     return _halInterface->_hal_name;
 }
 
 HALInterface::HALType XBotPlugin::get_hal_type(){
-  
+    if(!_halInterface) return HALInterface::NRT;
     return _halInterface->_hal_type;
 }
     
