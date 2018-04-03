@@ -22,8 +22,6 @@
 #include <ros/transport_hints.h> 
 #include <XBotInterface/SoLib.h>
 
-using XBot::Logger;
-
 REGISTER_SO_LIB_(XBot::CommandAdvr, XBot::GenericControlMessage);
 
 using XBot::Logger;
@@ -65,6 +63,10 @@ void XBot::CommandAdvr::callback(XBotCore::CommandAdvrConstPtr msg)
             _msg.velocity[idx] = msg->velocity[i];
         }
         
+        if(msg->ctrl_mode.size() > i){
+            _msg.ctrl_mode[idx] = msg->ctrl_mode[i];
+        }
+        
         _msg.seq_id++;
     }
 }
@@ -80,11 +82,11 @@ bool XBot::CommandAdvr::service_callback(XBotCore::advr_controller_joint_namesRe
 bool XBot::CommandAdvr::init(const std::string& path_to_config_file, XBot::GenericControlMessage::Type type)
 {
 
-    Logger::info() << "Initializing CommandAdvr message interface" << Logger::endl();
-   
-   std::string robot_name = XBot::ModelInterface::getModel(path_to_config_file)->getUrdf().getName();
-   std::string joint_service_name = "/" + robot_name + "/position_controller/get_joint_names";
-   std::string command_topic_name = "/xbotcore/" + robot_name + "/command";
+    Logger::info("Initializing CommandAdvr message interface\n");
+    
+    std::string robot_name = XBot::ModelInterface::getModel(path_to_config_file)->getUrdf().getName();
+    std::string joint_service_name = "/" + robot_name + "/position_controller/get_joint_names";
+    std::string command_topic_name = "/xbotcore/" + robot_name + "/command";
 
     ros::NodeHandle nh;
 
@@ -102,6 +104,9 @@ bool XBot::CommandAdvr::init(const std::string& path_to_config_file, XBot::Gener
         robot->getStiffness(_joint_stiffness);
         robot->getDamping(_joint_damping);
 
+        XBot::ControlMode::Bitset bit_set;
+        bit_set = ~bit_set.set();
+        
         for( const std::string& jname : robot->getEnabledJointNames() ){
 
             _joint_names_res.name.push_back(jname);
@@ -112,6 +117,8 @@ bool XBot::CommandAdvr::init(const std::string& path_to_config_file, XBot::Gener
             _msg.position.push_back(_joint_pos.at(jname));
             _msg.stiffness.push_back(_joint_stiffness.at(jname));
             _msg.velocity.push_back(0);
+            _msg.ctrl_mode.push_back(static_cast<uint8_t>(bit_set.to_ulong()));
+            
         }
         
         _msg.seq_id = 0;
@@ -131,6 +138,9 @@ bool XBot::CommandAdvr::init(const std::string& path_to_config_file, XBot::Gener
             std::cerr << "ERROR service client " << joint_service_name << " not available! Write() won't work!!" << std::endl;
             return false;
         }
+        
+        XBot::ControlMode::Bitset bit_set;
+        bit_set = ~bit_set.set();
 
         for( const std::string& jname : _joint_names_res.name ){
             _msg.name.push_back(jname);
@@ -140,6 +150,8 @@ bool XBot::CommandAdvr::init(const std::string& path_to_config_file, XBot::Gener
             _msg.position.push_back(0);
             _msg.stiffness.push_back(0);
             _msg.velocity.push_back(0);
+            _msg.ctrl_mode.push_back(static_cast<uint8_t>(bit_set.to_ulong()));
+            
         }
         
         _msg.seq_id = 0;
@@ -214,6 +226,17 @@ int& XBot::CommandAdvr::seq_id()
 {
     return _msg.seq_id;
 }
+
+XBot::ControlMode XBot::CommandAdvr::get_ctrl_mode(int index) const
+{
+    return ControlMode::FromBitset( ControlMode::Bitset(_msg.ctrl_mode[index]) );
+}
+
+void XBot::CommandAdvr::set_ctrl_mode(int index, const XBot::ControlMode& ctrl_mode)
+{
+    _msg.ctrl_mode[index] = static_cast<uint8_t>(ControlMode::AsBitset(ctrl_mode).to_ulong());
+}
+
 
 void XBot::CommandAdvr::publish()
 {
