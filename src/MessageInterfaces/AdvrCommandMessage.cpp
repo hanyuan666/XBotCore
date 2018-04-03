@@ -94,7 +94,11 @@ bool XBot::CommandAdvr::init(const std::string& path_to_config_file, XBot::Gener
     
     if( type == XBot::GenericControlMessage::Type::Rx ) {
         
-        _sub = nh.subscribe(command_topic_name, 1, &XBot::CommandAdvr::callback, this, ros::TransportHints().tcpNoDelay());
+        const int QUEUE_SIZE = 100;
+        _sub = nh.subscribe(command_topic_name, 
+                            QUEUE_SIZE, 
+                            &XBot::CommandAdvr::callback, this, 
+                            ros::TransportHints().tcpNoDelay());
 
         auto robot = XBot::RobotInterface::getRobot(path_to_config_file, "xddp_robot");
         robot->sense();
