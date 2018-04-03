@@ -476,7 +476,10 @@ void CommunicationInterfaceROS::resetReference()
 
 void CommunicationInterfaceROS::receiveReference()
 {
-if( !_receive_commands_ok ) return;
+    
+    // NOTE TBD VERY INEFFICIENT IMPLEMENTATION
+    
+    if( !_receive_commands_ok ) return;
 
     ros::spinOnce();
     
@@ -484,39 +487,77 @@ if( !_receive_commands_ok ) return;
         
         current_seq_id = _control_message->seq_id();
 
+        /* Position reference */
+        
+        _robot->getPositionReference(_joint_id_map);
+        
         for( const auto& pair : _jointid_to_command_msg_idx ){
-            _joint_id_map[pair.first] = _control_message->position(pair.second);
+            if( _control_message->get_ctrl_mode(pair.second).isPositionEnabled())
+            {
+                _joint_id_map[pair.first] = _control_message->position(pair.second);
+            }
         }
 
         _robot->setPositionReference(_joint_id_map);
-
-
+        
+        
+        /* Velocity reference */
+        
+        _robot->getVelocityReference(_joint_id_map);
+        
         for( const auto& pair : _jointid_to_command_msg_idx ){
-            _joint_id_map[pair.first] = _control_message->velocity(pair.second);
+            if( _control_message->get_ctrl_mode(pair.second).isVelocityEnabled())
+            {
+                _joint_id_map[pair.first] = _control_message->velocity(pair.second);
+            }
         }
 
         _robot->setVelocityReference(_joint_id_map);
 
-
+        
+        /* Effort reference */
+        
+        _robot->getEffortReference(_joint_id_map);
+        
         for( const auto& pair : _jointid_to_command_msg_idx ){
-            _joint_id_map[pair.first] = _control_message->effort(pair.second);
+            if( _control_message->get_ctrl_mode(pair.second).isEffortEnabled())
+            {
+                _joint_id_map[pair.first] = _control_message->effort(pair.second);
+            }
         }
 
         _robot->setEffortReference(_joint_id_map);
 
-
+        
+        
+        /* Stiffness */
+        
+        _robot->getStiffness(_joint_id_map);
+        
         for( const auto& pair : _jointid_to_command_msg_idx ){
-            _joint_id_map[pair.first] = _control_message->stiffness(pair.second);
+            if( _control_message->get_ctrl_mode(pair.second).isStiffnessEnabled())
+            {
+                _joint_id_map[pair.first] = _control_message->stiffness(pair.second);
+            }
         }
 
         _robot->setStiffness(_joint_id_map);
 
-
+        
+        
+        /* Damping */
+        
+        _robot->getDamping(_joint_id_map);
+        
         for( const auto& pair : _jointid_to_command_msg_idx ){
-            _joint_id_map[pair.first] = _control_message->damping(pair.second);
+            if( _control_message->get_ctrl_mode(pair.second).isDampingEnabled())
+            {
+                _joint_id_map[pair.first] = _control_message->damping(pair.second);
+            }
         }
 
         _robot->setDamping(_joint_id_map);
+
     }
     else {
         resetReference();
