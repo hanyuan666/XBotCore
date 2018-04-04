@@ -44,7 +44,7 @@ void XBot::CommandAdvr::callback(XBotCore::CommandAdvrConstPtr msg)
         }
         else
         {
-            Logger::warning("ERROR while parsing CommandAdvr message: %d-th control mode undefined\n", i);
+            Logger::warning("ERROR while parsing CommandAdvr message: %d-th control mode undefined\n Send a bitmask [Damp Stiff Torque Vel Pos], e.g. 3 for position and velocity control\n ", i);
             continue;
         }
 
