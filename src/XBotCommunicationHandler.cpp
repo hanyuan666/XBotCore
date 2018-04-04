@@ -372,7 +372,7 @@ void XBot::CommunicationHandler::th_loop(void*)
             std::string command;
             if( comm_ifc->receiveFromSwitch(_switch_names[i], command) ){
                 _switch_pub_vector[i].write(command);
-                if( i == xbot_communication_idx && command.compare("stop"))
+                if( i == xbot_communication_idx && command == "start")
                   _master_communication_ifc->resetReference();
             }
             if( comm_ifc->receiveFromCmd(_command_names[i], command) ){
