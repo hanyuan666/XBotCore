@@ -86,8 +86,8 @@ void XBot::XBotNRTRef::control_loop(double time, double period)
             _tor_ref_map[p.first] = _pdo_tx.tor_ref;
             _k_ref_map[p.first] = _pdo_tx.gain_0;
             _d_ref_map[p.first] = _pdo_tx.gain_1;
-
-//             std::cout <<"read --" <<  p.first << " -- " << _pos_ref_map[p.first] << std::endl;
+            
+            
             
         }
         
@@ -101,11 +101,6 @@ void XBot::XBotNRTRef::control_loop(double time, double period)
     (_ref_map_so.at("tor_ref_map_so")).set(_tor_ref_map);
     (_ref_map_so.at("k_ref_map_so")).set(_k_ref_map);
     (_ref_map_so.at("d_ref_map_so")).set(_d_ref_map);
-    
-    
-//     for(auto p : *(_ref_map_so.at("pos_ref_map_so"))) {
-//         std::cout <<"NRT --" <<  p.first << " -- " << p.second << std::endl;
-//     }
 
 }
 
