@@ -33,7 +33,18 @@ void XBot::CommandAdvr::callback(XBotCore::CommandAdvrConstPtr msg)
         int idx = getIndex(msg->name[i]);
 
         if(idx < 0){
-            Logger::warning() << "ERROR while parsing CommandAdvr message: joint " << msg->name[i] << " undefined" << Logger::endl();
+            Logger::warning("ERROR while parsing CommandAdvr message: joint %s undefined\n", msg->name[i].c_str());
+            continue;
+        }
+        
+        ControlMode ctrl_mode;
+        
+        if(msg->ctrl_mode.size() > i){
+            ctrl_mode = ControlMode::FromBitset(ControlMode::Bitset(msg->ctrl_mode[i]));
+        }
+        else
+        {
+            Logger::warning("ERROR while parsing CommandAdvr message: %d-th control mode undefined\n", i);
             continue;
         }
 
@@ -43,28 +54,24 @@ void XBot::CommandAdvr::callback(XBotCore::CommandAdvrConstPtr msg)
 
         _msg.aux_name = msg->aux_name;
 
-        if(msg->damping.size() > i){
+        if(msg->damping.size() > i && ctrl_mode.isDampingEnabled()){
             _msg.damping[idx] = msg->damping[i];
         }
 
-        if(msg->effort.size() > i){
+        if(msg->effort.size() > i && ctrl_mode.isEffortEnabled()){
             _msg.effort[idx] = msg->effort[i];
         }
 
-        if(msg->position.size() > i){
+        if(msg->position.size() > i && ctrl_mode.isPositionEnabled()){
             _msg.position[idx] = msg->position[i];
         }
 
-        if(msg->stiffness.size() > i){
+        if(msg->stiffness.size() > i && ctrl_mode.isStiffnessEnabled()){
             _msg.stiffness[idx] = msg->stiffness[i];
         }
 
-        if(msg->velocity.size() > i){
+        if(msg->velocity.size() > i && ctrl_mode.isVelocityEnabled()){
             _msg.velocity[idx] = msg->velocity[i];
-        }
-        
-        if(msg->ctrl_mode.size() > i){
-            _msg.ctrl_mode[idx] = msg->ctrl_mode[i];
         }
         
         _msg.seq_id++;
@@ -109,7 +116,7 @@ bool XBot::CommandAdvr::init(const std::string& path_to_config_file, XBot::Gener
         robot->getDamping(_joint_damping);
 
         XBot::ControlMode::Bitset bit_set;
-        bit_set = ~bit_set.set();
+        bit_set.set();
         
         for( const std::string& jname : robot->getEnabledJointNames() ){
 
