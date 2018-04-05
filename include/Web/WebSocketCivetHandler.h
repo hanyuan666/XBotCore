@@ -31,12 +31,18 @@
 #include <XBotCore-interfaces/XDomainCommunication.h>
 #include <eigen_conversions/eigen_msg.h>
 
+#include <ros/ros.h>
+#include <geometry_msgs/PoseStamped.h>
+
 class WebRobotStateTX;
 class SharedData;
 
 class WebSocketHandler : public CivetWebSocketHandler {
 
   public:
+    std::shared_ptr<ros::NodeHandle> _nh;
+    ros::Publisher _pubJoint;
+    
     
     WebSocketHandler(std::shared_ptr<Buffer<WebRobotStateTX>> buffer, std::shared_ptr<SharedData> sharedData){
       
@@ -49,6 +55,18 @@ class WebSocketHandler : public CivetWebSocketHandler {
       /*for(std::string pipe_name : _pipe_names){
         _pub_nrt.push_back(XBot::PublisherNRT<Eigen::Affine3d>(pipe_name));
     }*/
+      
+      ///xbotcore/cartesian/arm1_7/rerence 
+      //Type: geometry_msgs/PoseStamped
+    int argc = 1;
+    const char *arg = "dummy_arg";
+    char* argg = const_cast<char*>(arg);
+    char** argv = &argg;
+
+     // ROS init
+    ros::init(argc, argv, "web");    
+    _nh = std::make_shared<ros::NodeHandle>();     
+    _pubJoint = _nh->advertise<geometry_msgs::PoseStamped>("/xbotcore/cartesian/arm2_8/reference", 1);    
     }
            
     virtual bool handleConnection(CivetServer *server, const struct mg_connection *conn);

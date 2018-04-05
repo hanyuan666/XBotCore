@@ -112,7 +112,17 @@ bool WebSocketHandler::handleData(CivetServer *server,
                                   0, 1,  0,
                                   -1,  0,  0;
             */                      
-            _pub_nrt[1].write(pose);
+            //_pub_nrt[1].write(pose);
+            
+            geometry_msgs::PoseStamped PoseMsg;
+            PoseMsg.pose.position.x = position_raw[0];
+            PoseMsg.pose.position.y = position_raw[1];
+            PoseMsg.pose.position.z = position_raw[2];
+            PoseMsg.pose.orientation.x = q.x();
+            PoseMsg.pose.orientation.y = q.y();
+            PoseMsg.pose.orientation.z = q.z();
+            PoseMsg.pose.orientation.w = q.w();
+            _pubJoint.publish(PoseMsg);      
      }}
      
     //read robot state
