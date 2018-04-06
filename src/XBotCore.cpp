@@ -36,6 +36,7 @@
 
 #include <XBotInterface/Utils.h>
 #include <XBotInterface/RtLog.hpp>
+#include <XBotInterface/SoLib.h>
 
 using XBot::Logger;
 
@@ -96,9 +97,9 @@ XBot::XBotCore::XBotCore(std::string config_yaml,
             abs_low_level_config = std::string(config_yaml);
     }
     
-    halInterface = HALInterfaceFactory::getFactory(lib_file, lib_name, abs_low_level_config.c_str());
-    
-    if(!halInterface) exit(1);
+//     halInterface = HALInterfaceFactory::getFactory(lib_file, lib_name, abs_low_level_config.c_str());
+//     
+//     if(!halInterface) exit(1);
 }
 
 XBot::XBotCore::XBotCore(std::string config_yaml, 
@@ -113,8 +114,17 @@ XBot::XBotCore::XBotCore(std::string config_yaml,
     _options(options)
 {        
     _time_provider = time_provider;
-    halInterface = halinterface;
+    halInterface = std::dynamic_pointer_cast<HALBase>(halinterface);
     if(!halInterface) exit(1);
+    
+    std::string path_to_shared_lib;
+    path_to_shared_lib = XBot::Utils::computeAbsolutePath("build/install/lib/libXBotEcat_Joint.so");
+    
+    std::cout<<"PATH "<<path_to_shared_lib<<std::endl;
+    HALInterface::Ptr joint = SoLib::getFactoryWithArgs<HALInterface>(path_to_shared_lib,"JOINT",halinterface);
+    halInterface->setJoint(joint);
+    //halInterface->setHandId(1,halinterface);
+    //halInterface->setSensorId(id,halinterface);
 }
 
 std::shared_ptr<Loader> XBot::XBotCore::getLoader(){
@@ -126,19 +136,13 @@ void XBot::XBotCore::init_internal()
 {
     // create robot from config file and any map
     XBot::AnyMapPtr anymap = std::make_shared<XBot::AnyMap>();
-    std::shared_ptr<HALInterface> hal(halInterface);
-    std::shared_ptr<XBot::IXBotJoint> xbot_joint(halInterface);
-    std::shared_ptr<XBot::IXBotFT> xbot_ft(halInterface);
-    std::shared_ptr<XBot::IXBotIMU> xbot_imu(halInterface);
-    std::shared_ptr<XBot::IXBotHand> xbot_hand(halInterface);
+    
     
     // TODO initilize it somewhere else
     bool xbot_enable_transmission = true;
     
-    (*anymap)["XBotJoint"] = boost::any(xbot_joint);
-    (*anymap)["XBotFT"] = boost::any(xbot_ft);
-    (*anymap)["XBotIMU"] = boost::any(xbot_imu);
-    (*anymap)["XBotHand"] = boost::any(xbot_hand);
+    (*anymap)["HAL"] = boost::any(halInterface);
+    (*anymap)["XBotJoint"] = boost::any(halInterface->getJoint());
     (*anymap)["EnableTransmissionPlugins"] = boost::any(xbot_enable_transmission);
     
     //TODO use isRT from RobotControlInterface robotInterface.IsRt()
@@ -153,7 +157,7 @@ void XBot::XBotCore::init_internal()
     }
     
     // create plugin handler
-    _pluginHandler = std::make_shared<XBot::PluginHandler>(_robot, _time_provider, _shmem, _options, hal);
+    _pluginHandler = std::make_shared<XBot::PluginHandler>(_robot, _time_provider, _shmem, _options, halInterface);
 
     _pluginHandler->load_plugins();
     
@@ -168,7 +172,7 @@ void XBot::XBotCore::init_internal()
 
 void XBot::XBotCore::control_init(void) 
 {
-     halInterface->init();
+     halInterface->base_init();
      init_internal();    
      
      return;
@@ -181,10 +185,10 @@ double XBot::XBotCore::get_time()
 
 int XBot::XBotCore::control_loop(void) 
 {       
-    int state = halInterface->recv_from_slave();
+    int state = halInterface->base_recv();
     if(state == 0)
       loop_internal();  
-    halInterface->send_to_slave();
+    halInterface->base_send();
 }
 
 void XBot::XBotCore::loop_internal()

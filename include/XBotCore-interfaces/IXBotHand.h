@@ -37,6 +37,8 @@ class XBot::IXBotHand
 
 public:
 
+    typedef std::shared_ptr<XBot::IXBotHand> Ptr;
+    
     virtual bool grasp(int hand_id, double grasp_percentage) = 0;
     
     virtual double get_grasp_state(int hand_id) = 0;
