@@ -31,7 +31,7 @@ XBot::ESCUtils::ESCUtils(XBot::RobotInterface::Ptr robot) :
     _robot->getJointEffort(_tau);
     _robot->getStiffness(_k);
     _robot->getDamping(_d);
-    _robot->getPositionReference(_qref);
+    _robot->getCurrentPositionReference(_qref);
     _robot->getVelocityReference(_qdotref);
     _robot->getEffortReference(_tauref);
 }
@@ -64,7 +64,7 @@ bool XBot::ESCUtils::setRobotStateFromRobotInterface(std::map< int, XBot::RobotS
     _robot->getJointEffort(_tau);
     _robot->getStiffness(_k);
     _robot->getDamping(_d);
-    _robot->getPositionReference(_qref);
+    _robot->getCurrentPositionReference(_qref);
     _robot->getVelocityReference(_qdotref);
     _robot->getEffortReference(_tauref);
 
@@ -74,13 +74,14 @@ bool XBot::ESCUtils::setRobotStateFromRobotInterface(std::map< int, XBot::RobotS
 
         robot_state.RobotStateRX.link_pos = _q[i];
         robot_state.RobotStateRX.motor_pos = _mq[i];
+        robot_state.RobotStateRX.cur_pos_ref = _qref[i];
         robot_state.RobotStateRX.link_vel = _qdot[i];
         robot_state.RobotStateRX.motor_vel = _mqdot[i];
         robot_state.RobotStateRX.torque = _tau[i];
 
         robot_state.RobotStateTX.gain_0 = _k[i];
         robot_state.RobotStateTX.gain_1 = _d[i];
-        robot_state.RobotStateTX.pos_ref = _qref[i];
+//         robot_state.RobotStateTX.pos_ref = _qref[i];  // do not send any TX information! TBD remove also others
         robot_state.RobotStateTX.vel_ref = _qdotref[i];
         robot_state.RobotStateTX.tor_ref = _tauref[i];
 
