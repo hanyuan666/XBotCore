@@ -86,20 +86,18 @@ void XBot::XBotCommunicationPlugin::on_stop(double time)
 void XBot::XBotCommunicationPlugin::control_loop(double time, double period)
 {
 
-    //if(command.read(current_command)){
-        if(current_command.str() == "filter ON"){
-            _filter_q.setOmega(2*3.1415*1.0);
-            _filter_k.setOmega(2*3.1415*1.0);
-            _filter_d.setOmega(2*3.1415*1.0);
-            _filter_qdot.setOmega(2*3.1415*1.0);
-        }
-        if(current_command.str() == "filter OFF"){
-            _filter_q.setOmega(2*3.1415*200);
-            _filter_k.setOmega(2*3.1415*200);
-            _filter_d.setOmega(2*3.1415*200);
-            _filter_qdot.setOmega(2*3.1415*200);
-        }
-    //}
+    if(current_command.str() == "filter ON"){
+        _filter_q.setOmega(2*3.1415*1.0);
+        _filter_k.setOmega(2*3.1415*1.0);
+        _filter_d.setOmega(2*3.1415*1.0);
+        _filter_qdot.setOmega(2*3.1415*1.0);
+    }
+    if(current_command.str() == "filter OFF"){
+        _filter_q.setOmega(2*3.1415*20);
+        _filter_k.setOmega(2*3.1415*1.0);
+        _filter_d.setOmega(2*3.1415*1.0);
+        _filter_qdot.setOmega(2*3.1415*1.0);
+    }
     
     // read from shared memory the ref maps and set them
 
