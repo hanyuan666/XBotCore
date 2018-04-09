@@ -288,7 +288,7 @@ bool XBot::XBotXDDP::get_gains(int joint_id, std::vector< double >& gain_vector)
 
 bool XBot::XBotXDDP::get_pos_ref(int joint_id, double& pos_ref)
 {
-    pos_ref = pdo_motor.at(joint_id)->RobotStateTX.pos_ref;
+    pos_ref = pdo_motor.at(joint_id)->RobotStateRX.cur_pos_ref;
     return true;
 }
 
