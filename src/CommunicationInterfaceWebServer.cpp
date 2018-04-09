@@ -24,9 +24,9 @@
 #include <unistd.h>
 #include <cstring>
 
-extern "C" XBot::CommunicationInterfaceWebServer* create_instance(XBot::RobotInterface::Ptr robot)
+extern "C" XBot::CommunicationInterfaceWebServer* create_instance(XBot::RobotInterface::Ptr robot, XBot::XBotXDDP::Ptr xddp_handler)
 {
-  return new XBot::CommunicationInterfaceWebServer(robot);
+  return new XBot::CommunicationInterfaceWebServer(robot, xddp_handler);
 }
 
 extern "C" void destroy_instance( XBot::CommunicationInterfaceWebServer* instance )
@@ -42,8 +42,8 @@ CommunicationInterfaceWebServer::CommunicationInterfaceWebServer():
     
 }
 
-CommunicationInterfaceWebServer::CommunicationInterfaceWebServer(XBotInterface::Ptr robot):
-    CommunicationInterface(robot),
+CommunicationInterfaceWebServer::CommunicationInterfaceWebServer(XBotInterface::Ptr robot, XBot::XBotXDDP::Ptr xddp_handler):
+    CommunicationInterface(robot,xddp_handler),
     _path_to_cfg(robot->getPathToConfig())
 {
     std::string aport = PORT;
@@ -169,7 +169,13 @@ void CommunicationInterfaceWebServer::sendRobotState()
         double pos_ref = pos_ref_id_map.at(id);
         double vel_ref = vel_ref_id_map.at(id);
         double eff_ref = eff_ref_id_map.at(id);
-                 
+        
+        double fault_value;
+        _xddp_handler->get_fault(id, fault_value);
+        
+        double aux_value;
+        _xddp_handler->get_aux(id, aux_value);
+        
         rstate.joint_id.push_back(id);
         rstate.link_position.push_back(jval);
         rstate.motor_position.push_back(mval);
@@ -179,6 +185,8 @@ void CommunicationInterfaceWebServer::sendRobotState()
         rstate.effort.push_back(effval);
         rstate.stiffness.push_back(stiffval);
         rstate.damping.push_back(dampval);
+        rstate.fault.push_back(fault_value);
+        rstate.aux.push_back(aux_value);
         
         rstate.position_ref.push_back(pos_ref);
         rstate.vel_ref.push_back(vel_ref);
