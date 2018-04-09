@@ -146,6 +146,7 @@ struct RobotState {
     struct pdo_rx {
         double    link_pos;          
         double    motor_pos;         
+        double    cur_pos_ref;
         double    link_vel;          
         double    motor_vel;         
         double    torque;            
