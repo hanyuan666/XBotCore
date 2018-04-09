@@ -531,7 +531,7 @@ void CommunicationInterfaceROS::receiveReference()
 
     }
     else {
-        resetReference();
+//         resetReference();
     }
 //     
     
