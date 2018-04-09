@@ -224,7 +224,7 @@ void XBot::CommunicationHandler::th_init(void*)
     
     /********************************WEB INTERFACE********************************************/
     if (loadWebServer) {
-      _web_communication = CommunicationInterfaceFactory::getFactory("libwebserver", "WEB_SERVER",_robot);
+      _web_communication = CommunicationInterfaceFactory::getFactory("libwebserver", "WEB_SERVER",_robot,_xddp_handler);
       if(_web_communication){
         _communication_ifc_vector.push_back( _web_communication );
       }
