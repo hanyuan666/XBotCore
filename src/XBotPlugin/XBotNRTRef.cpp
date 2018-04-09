@@ -96,9 +96,6 @@ void XBot::XBotNRTRef::control_loop(double time, double period)
     (_ref_map_so.at("d_ref_map_so")).set(_d_ref_map);
     
     
-//     for(auto p : *(_ref_map_so.at("pos_ref_map_so"))) {
-//         std::cout <<"NRT --" <<  p.first << " -- " << p.second << std::endl;
-//     }
 
 }
 

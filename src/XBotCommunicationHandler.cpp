@@ -331,16 +331,18 @@ void XBot::CommunicationHandler::th_loop(void*)
             else if ( master == "WEB" ||
                  master == "web"
             ) {
-                Logger::info(Logger::Severity::HIGH) << "Switching to WEB Master Communication Interface" << Logger::endl();
-
-                _master_communication_ifc = _web_communication;
-                // HACK restarting XBotCommunicationPlugin
-                std::string cmd = "stop";
-                _switch_pub_vector[xbot_communication_idx].write(cmd);
-                sleep(1);
-                cmd = "start";
-                _switch_pub_vector[xbot_communication_idx].write(cmd);
-
+                if(loadWebServer){
+                  Logger::info(Logger::Severity::HIGH) << "Switching to WEB Master Communication Interface" << Logger::endl();
+                  _master_communication_ifc = _web_communication;
+                  // HACK restarting XBotCommunicationPlugin
+                  std::string cmd = "stop";
+                  _switch_pub_vector[xbot_communication_idx].write(cmd);
+                  _master_communication_ifc->resetReference();
+                  sleep(1);
+                  cmd = "start";
+                  _switch_pub_vector[xbot_communication_idx].write(cmd);
+                }else
+                  Logger::warning(Logger::Severity::HIGH) << "WebServer is disabled from the configuration file" << Logger::endl();
                 
             }
 
@@ -370,6 +372,8 @@ void XBot::CommunicationHandler::th_loop(void*)
             std::string command;
             if( comm_ifc->receiveFromSwitch(_switch_names[i], command) ){
                 _switch_pub_vector[i].write(command);
+                if( i == xbot_communication_idx && command == "start")
+                  _master_communication_ifc->resetReference();
             }
             if( comm_ifc->receiveFromCmd(_command_names[i], command) ){
                 _command_pub_vector[i].write(command);
