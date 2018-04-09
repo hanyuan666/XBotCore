@@ -75,20 +75,13 @@ void XBot::XBotNRTRef::control_loop(double time, double period)
     
     for( auto& p: _sub_map) {
         if( p.second.read(_pdo_tx) ) {
-          
-            /*if( _hand_map[p.first] != nullptr){                
-                //  HACK scaling back based on 9.0 max range
-                _hand_map[p.first]->grasp(_pdo_tx.pos_ref / 9.0);
-            }*/          
-            
+
             _pos_ref_map[p.first] = _pdo_tx.pos_ref;
             _vel_ref_map[p.first] = _pdo_tx.vel_ref;
             _tor_ref_map[p.first] = _pdo_tx.tor_ref;
             _k_ref_map[p.first] = _pdo_tx.gain_0;
             _d_ref_map[p.first] = _pdo_tx.gain_1;
 
-//             std::cout <<"read --" <<  p.first << " -- " << _pos_ref_map[p.first] << std::endl;
-            
         }
         
 

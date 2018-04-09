@@ -315,7 +315,7 @@ void CommunicationInterfaceROS::sendRobotState()
         _jointstate_message->temperature(joint_state_msg_idx) = _joint_id_map.at(id);
     }
 
-     _robot->getPositionReference(_joint_id_map);
+     _robot->getCurrentPositionReference(_joint_id_map);
      
      for( int id : _robot->getEnabledJointId() ){
         int joint_state_msg_idx = _jointid_to_jointstate_msg_idx.at(id);
@@ -436,7 +436,8 @@ void CommunicationInterfaceROS::sendRobotState()
 
 void CommunicationInterfaceROS::resetReference()
 {
-    _robot->getPositionReference(_joint_id_map);
+    _robot->getCurrentPositionReference(_joint_id_map);
+    _robot->setPositionReference(_joint_id_map);
     
     for( const auto& pair : _jointid_to_command_msg_idx ){
          _control_message->position(pair.second) = _joint_id_map[pair.first];
