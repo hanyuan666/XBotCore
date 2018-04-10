@@ -134,15 +134,18 @@ XBot::XBotCoreThread::XBotCoreThread(std::string config_yaml,
       const YAML::Node& list = hal_lib["IEndEffectors"];
       XBot::Logger::info(Logger::Severity::HIGH)<<"Loading end_effectors.."<<Logger::endl();
       for(const auto& end_eff : list){
-	  int id =  end_eff[0].as<int>();
 	  std::string iend_eff = end_eff[1].as<std::string>();
 	  lib = path_to_shared_lib + iend_eff+".so";
-	  HALInterface::Ptr hand = SoLib::getFactoryWithArgs<HALInterface>(lib,"HAND"+id,halInterface);
-	  if( hand){
-	    XBot::Logger::info(Logger::Severity::HIGH)<<"ID: "<<id<<" lib: "<<iend_eff<<Logger::endl();
-	    halInterface->setHandId(id,hand);
-	  }else{
-	    XBot::Logger::error()<<"Unable to load end_effector ID: "<<id<<" lib: "<<iend_eff<<Logger::endl();
+	  HALInterface::Ptr hand = SoLib::getFactoryWithArgs<HALInterface>(lib,"HAND"+iend_eff,halInterface);
+	  for(const auto& id : end_eff[0]){
+	    int idn =  id.as<int>();
+	    if( hand){
+	      XBot::Logger::info(Logger::Severity::HIGH)<<"ID: "<<id<<" lib: "<<iend_eff<<Logger::endl();
+	      halInterface->setHandId(idn,hand);
+	      if (!halInterface->isLoaded(iend_eff)) halInterface->addLib(iend_eff,hand);
+	    }else{
+	      XBot::Logger::error()<<"Unable to load end_effector ID: "<<id<<" lib: "<<iend_eff<<Logger::endl();
+	    }
 	  }
       }  
     }
@@ -151,15 +154,18 @@ XBot::XBotCoreThread::XBotCoreThread(std::string config_yaml,
       const YAML::Node& list = hal_lib["ISensors"];
       XBot::Logger::info(Logger::Severity::HIGH)<<"Loading sensors.."<<Logger::endl();
       for(const auto& sensor : list){
-	  int id =  sensor[0].as<int>(); 
 	  std::string isensor = sensor[1].as<std::string>();
 	  lib = path_to_shared_lib + isensor+".so";
-	  HALInterface::Ptr sensorptr = SoLib::getFactoryWithArgs<HALInterface>(lib,"SENSOR"+id,halInterface);
-	  if(sensorptr){
-	    XBot::Logger::info(Logger::Severity::HIGH)<<"ID: "<<id<<" lib: "<<isensor<<Logger::endl();
-	    halInterface->setSensorId(id,sensorptr);
-	  }else{
-	    XBot::Logger::error()<<"Unable to load sensor ID: "<<id<<" lib: "<<isensor<<Logger::endl();
+	  HALInterface::Ptr sensorptr = SoLib::getFactoryWithArgs<HALInterface>(lib,"SENSOR"+isensor,halInterface);
+	  for(const auto& id : sensor[0]){
+	      int idn =  id.as<int>();
+	      if(sensorptr){
+		XBot::Logger::info(Logger::Severity::HIGH)<<"ID: "<<idn<<" lib: "<<isensor<<Logger::endl();
+		halInterface->setSensorId(idn,sensorptr);
+		if (!halInterface->isLoaded(isensor)) halInterface->addLib(isensor,sensorptr);
+	      }else{
+		XBot::Logger::error()<<"Unable to load sensor ID: "<<idn<<" lib: "<<isensor<<Logger::endl();
+	      }
 	  }
       }  
     }

@@ -23,6 +23,17 @@ public:
       return msensors[id];
     }
     
+    bool isLoaded(const std::string& val){
+      
+      if (mlibs[val] == nullptr) return false;
+      return true;
+    } 
+    
+    void addLib(const std::string& val,HALInterface::Ptr lib){
+      
+      mlibs[val] = lib;
+    }
+    
     void setJoint( HALInterface::Ptr joint){      
       mjoint = joint;
     }
@@ -38,8 +49,7 @@ public:
     int base_init(){
       
       init();
-      init_actuators();
-      init_sensors();     
+      init_devices();  
       post_init();
       
       return 0;
@@ -48,8 +58,7 @@ public:
     int base_recv(){
       
       recv_from_slave();
-      recv_actuators();
-      recv_sensors();     
+      recv_devices();   
       
       return 0;
     }
@@ -66,41 +75,28 @@ private:
   
     std::map<int, HALInterface::Ptr> mhands;
     std::map<int, HALInterface::Ptr> msensors;
+    std::map<std::string, HALInterface::Ptr> mlibs;
+    
     HALInterface::Ptr mjoint;
 
     virtual void post_init(){};
     
-    void init_sensors(){
-      
-      for (std::map<int, HALInterface::Ptr>::iterator it = msensors.begin(); it != msensors.end(); ++it)
-      {
-        it->second->init();
-      }
-      
-    }
-    void init_actuators(){
+    void init_devices(){
             
       mjoint->init();
       
-      for (std::map<int, HALInterface::Ptr>::iterator it = mhands.begin(); it != mhands.end(); ++it)
+      for (std::map<std::string, HALInterface::Ptr>::iterator it = mlibs.begin(); it != mlibs.end(); ++it)
       {
         it->second->init();
       }
       
     }
-    int recv_sensors(){
-      
-      for (std::map<int, HALInterface::Ptr>::iterator it = msensors.begin(); it != msensors.end(); ++it)
-      {
-        it->second->recv_from_slave();
-      }      
-      
-    }
-    int recv_actuators(){
+   
+    int recv_devices(){
       
       mjoint->recv_from_slave();
       
-      for (std::map<int, HALInterface::Ptr>::iterator it = mhands.begin(); it != mhands.end(); ++it)
+      for (std::map<std::string, HALInterface::Ptr>::iterator it = mlibs.begin(); it != mlibs.end(); ++it)
       {
         it->second->recv_from_slave();
       }   
@@ -110,7 +106,7 @@ private:
       
       mjoint->send_to_slave();
       
-      for (std::map<int, HALInterface::Ptr>::iterator it = mhands.begin(); it != mhands.end(); ++it)
+      for (std::map<std::string, HALInterface::Ptr>::iterator it = mlibs.begin(); it != mlibs.end(); ++it)
       {
         it->second->send_to_slave();
       }   
