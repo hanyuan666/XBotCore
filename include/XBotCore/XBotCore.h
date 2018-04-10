@@ -62,7 +62,7 @@ public:
              Options options);
     
     XBotCore(std::string config_yaml, 
-             std::shared_ptr<HALInterface> halInterface, 
+             std::shared_ptr<HALBase> halInterface, 
              XBot::SharedMemory::Ptr shmem,
              Options options,
              std::shared_ptr<XBot::TimeProviderFunction<boost::function<double()>>> time_provider = nullptr

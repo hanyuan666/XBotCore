@@ -28,6 +28,8 @@
 
 #include <XBotCore/XBotCoreThread.h>
 #include <XBotCore/HALInterfaceFactory.h>
+#include <XBotInterface/SoLib.h>
+#include <XBotCore/HALThread.h>
 
 XBot::XBotCoreThread::XBotCoreThread(std::string config_yaml, 
                    XBot::SharedMemory::Ptr shared_memory,  
@@ -75,21 +77,25 @@ XBot::XBotCoreThread::XBotCoreThread(std::string config_yaml,
     }
 
     
-    const YAML::Node &hal_lib = root["HALInterface"];
+    YAML::Node hal_lib;
     std::string lib_file = "";
     std::string lib_name="";
+    std::string  iJoint="";
     
     HALInterface::Ptr __hal;
+    HALBase::Ptr halInterface;
+    
+    std::string path_to_shared_lib;
+    path_to_shared_lib = XBot::Utils::computeAbsolutePath("build/install/lib/");
     
     if(options.xbotcore_dummy_mode){ // dummy mode
     
         lib_file = "libXBotDummy";
         lib_name = "DUMMY";
-        
+        iJoint = "libXBotDummyJoint";
+	
         // NOTE dummy needs high level config
         abs_low_level_config = std::string(config_yaml);
-        
-        __hal = HALInterfaceFactory::getFactory(lib_file, lib_name, abs_low_level_config.c_str());
         
     }
     else if(hal) // hal provided by constructor
@@ -98,18 +104,68 @@ XBot::XBotCoreThread::XBotCoreThread(std::string config_yaml,
     }
     else if(!hal && hal_lib) // hal is not provided by the constructor
     {
-        lib_file = hal_lib["lib_file"].as<std::string>();
+        hal_lib = root["HALInterface"];
+	lib_file = hal_lib["lib_file"].as<std::string>();
         lib_name = hal_lib["lib_name"].as<std::string>();
-        
-        __hal = HALInterfaceFactory::getFactory(lib_file, lib_name, abs_low_level_config.c_str());
+	if (hal_lib["IJoint"]){
+	  iJoint = hal_lib["IJoint"].as<std::string>();
+	}else{
+	   XBot::Logger::warning()<<"Yaml node IJoint missing in the config. file"<<Logger::endl();
+	}
     }
     else{
         throw std::runtime_error("Unable to load HAL");
     }
+      
+    __hal = HALInterfaceFactory::getFactory(lib_file, lib_name, abs_low_level_config.c_str());
+    halInterface = std::dynamic_pointer_cast<HALBase>(__hal);
+    std::string lib;
+    if(!std::dynamic_pointer_cast<XBot::HALThread>(__hal)){
+      lib = path_to_shared_lib + iJoint+".so";
+      HALInterface::Ptr joint = SoLib::getFactoryWithArgs<HALInterface>(lib,"JOINT",__hal);
+      if (joint){
+	halInterface->setJoint(joint);
+      }else {
+	XBot::Logger::error()<<"Unable to load IJoint lib "<<iJoint<<Logger::endl();
+      }
+    }
     
+    if (hal_lib["IEndEffectors"]){
+      const YAML::Node& list = hal_lib["IEndEffectors"];
+      XBot::Logger::info(Logger::Severity::HIGH)<<"Loading end_effectors.."<<Logger::endl();
+      for(const auto& end_eff : list){
+	  int id =  end_eff[0].as<int>();
+	  std::string iend_eff = end_eff[1].as<std::string>();
+	  lib = path_to_shared_lib + iend_eff+".so";
+	  HALInterface::Ptr hand = SoLib::getFactoryWithArgs<HALInterface>(lib,"HAND"+id,halInterface);
+	  if( hand){
+	    XBot::Logger::info(Logger::Severity::HIGH)<<"ID: "<<id<<" lib: "<<iend_eff<<Logger::endl();
+	    halInterface->setHandId(id,hand);
+	  }else{
+	    XBot::Logger::error()<<"Unable to load end_effector ID: "<<id<<" lib: "<<iend_eff<<Logger::endl();
+	  }
+      }  
+    }
+  
+    if (hal_lib["ISensors"]){
+      const YAML::Node& list = hal_lib["ISensors"];
+      XBot::Logger::info(Logger::Severity::HIGH)<<"Loading sensors.."<<Logger::endl();
+      for(const auto& sensor : list){
+	  int id =  sensor[0].as<int>(); 
+	  std::string isensor = sensor[1].as<std::string>();
+	  lib = path_to_shared_lib + isensor+".so";
+	  HALInterface::Ptr sensorptr = SoLib::getFactoryWithArgs<HALInterface>(lib,"SENSOR"+id,halInterface);
+	  if(sensorptr){
+	    XBot::Logger::info(Logger::Severity::HIGH)<<"ID: "<<id<<" lib: "<<isensor<<Logger::endl();
+	    halInterface->setSensorId(id,sensorptr);
+	  }else{
+	    XBot::Logger::error()<<"Unable to load sensor ID: "<<id<<" lib: "<<isensor<<Logger::endl();
+	  }
+      }  
+    }
 
     controller = std::shared_ptr<ControllerInterface>(new XBot::XBotCore(config_yaml, 
-                                                                         __hal, 
+                                                                         halInterface, 
                                                                          shared_memory, 
                                                                          options, 
                                                                          time_provider)

@@ -40,6 +40,7 @@ public:
       init();
       init_actuators();
       init_sensors();     
+      post_init();
       
       return 0;
     }
@@ -67,6 +68,8 @@ private:
     std::map<int, HALInterface::Ptr> msensors;
     HALInterface::Ptr mjoint;
 
+    virtual void post_init(){};
+    
     void init_sensors(){
       
       for (std::map<int, HALInterface::Ptr>::iterator it = msensors.begin(); it != msensors.end(); ++it)

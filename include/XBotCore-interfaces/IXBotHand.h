@@ -22,6 +22,7 @@
 #define __I_X_BOT_HAND_H__
 
 #include <vector>
+#include <memory>
 
 namespace XBot
 {

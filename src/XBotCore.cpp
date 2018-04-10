@@ -36,7 +36,7 @@
 
 #include <XBotInterface/Utils.h>
 #include <XBotInterface/RtLog.hpp>
-#include <XBotInterface/SoLib.h>
+
 
 using XBot::Logger;
 
@@ -103,7 +103,7 @@ XBot::XBotCore::XBotCore(std::string config_yaml,
 }
 
 XBot::XBotCore::XBotCore(std::string config_yaml, 
-                         std::shared_ptr<HALInterface> halinterface, 
+                         std::shared_ptr<HALBase> halinterface, 
                          XBot::SharedMemory::Ptr shmem,
                          Options options,
                          std::shared_ptr<XBot::TimeProviderFunction<boost::function<double()>>> time_provider
@@ -111,20 +111,11 @@ XBot::XBotCore::XBotCore(std::string config_yaml,
                         ) : 
     _path_to_config(config_yaml),
     _shmem(shmem),
-    _options(options)
+    _options(options),
+    halInterface(halinterface)
 {        
     _time_provider = time_provider;
-    halInterface = std::dynamic_pointer_cast<HALBase>(halinterface);
     if(!halInterface) exit(1);
-    
-    std::string path_to_shared_lib;
-    path_to_shared_lib = XBot::Utils::computeAbsolutePath("build/install/lib/libXBotEcat_Joint.so");
-    
-    std::cout<<"PATH "<<path_to_shared_lib<<std::endl;
-    HALInterface::Ptr joint = SoLib::getFactoryWithArgs<HALInterface>(path_to_shared_lib,"JOINT",halinterface);
-    halInterface->setJoint(joint);
-    //halInterface->setHandId(1,halinterface);
-    //halInterface->setSensorId(id,halinterface);
 }
 
 std::shared_ptr<Loader> XBot::XBotCore::getLoader(){
@@ -143,6 +134,9 @@ void XBot::XBotCore::init_internal()
     
     (*anymap)["HAL"] = boost::any(halInterface);
     (*anymap)["XBotJoint"] = boost::any(halInterface->getJoint());
+//     (*anymap)["XBotFT"] = boost::any(halInterface->getSensorId(18));
+//     (*anymap)["XBotIMU"] = boost::any(halInterface->getSensorId(104));
+//     (*anymap)["XBotHand"] = boost::any(halInterface->getHandId(19));
     (*anymap)["EnableTransmissionPlugins"] = boost::any(xbot_enable_transmission);
     
     //TODO use isRT from RobotControlInterface robotInterface.IsRt()
