@@ -43,66 +43,6 @@ using XBot::Logger;
 std::shared_ptr<Loader> XBot::XBotCore::loaderptr;
 
 XBot::XBotCore::XBotCore(std::string config_yaml, 
-                         XBot::SharedMemory::Ptr shmem,  
-                         Options options) : 
-    _path_to_config(config_yaml),
-    _shmem(shmem),
-    _options(options)
-{        
-   
-    YAML::Node root_cfg = YAML::LoadFile(config_yaml);
-    
-    YAML::Node x_bot_core, root;
-    
-    std::string abs_low_level_config = "";
-    
-    // check gains in XBotCore node specifing config path YAML
-    if(root_cfg["XBotCore"]) {
-        x_bot_core = root_cfg["XBotCore"];
-            
-        if(x_bot_core["config_path"]) {
-            
-            abs_low_level_config = XBot::Utils::computeAbsolutePath(x_bot_core["config_path"].as<std::string>());
-            
-            Logger::info() << "Path to low level config is " << x_bot_core["config_path"].as<std::string>() << Logger::endl();
-            
-            Logger::info() << "Abs path to low level config is " << abs_low_level_config << Logger::endl();
-            
-            root = YAML::LoadFile(abs_low_level_config);
-        }
-    }
-
-    
-    const YAML::Node &hal_lib = root["HALInterface"];
-    
-    lib_file = "";
-    std::string lib_name="";
-    if( hal_lib == nullptr){
-      
-      Logger::error() <<"HALInterface parameter missing in config file " << Logger::endl();
-      exit(1);
-      
-    }else{
-      
-      lib_file = hal_lib["lib_file"].as<std::string>();
-      lib_name = hal_lib["lib_name"].as<std::string>();
-    }
-    
-    if(options.xbotcore_dummy_mode){
-      
-            lib_file = "libXBotDummy";
-            lib_name = "DUMMY";
-            
-            // NOTE dummy needs high level config
-            abs_low_level_config = std::string(config_yaml);
-    }
-    
-//     halInterface = HALInterfaceFactory::getFactory(lib_file, lib_name, abs_low_level_config.c_str());
-//     
-//     if(!halInterface) exit(1);
-}
-
-XBot::XBotCore::XBotCore(std::string config_yaml, 
                          std::shared_ptr<HALBase> halinterface, 
                          XBot::SharedMemory::Ptr shmem,
                          Options options,

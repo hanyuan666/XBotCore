@@ -58,10 +58,6 @@ class XBot::XBotCore : public ControllerInterface
 public:
     
     XBotCore(std::string config_yaml, 
-             XBot::SharedMemory::Ptr shmem, 
-             Options options);
-    
-    XBotCore(std::string config_yaml, 
              std::shared_ptr<HALBase> halInterface, 
              XBot::SharedMemory::Ptr shmem,
              Options options,
