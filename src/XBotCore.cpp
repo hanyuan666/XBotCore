@@ -67,16 +67,11 @@ void XBot::XBotCore::init_internal()
 {
     // create robot from config file and any map
     XBot::AnyMapPtr anymap = std::make_shared<XBot::AnyMap>();
-    
-    
+ 
     // TODO initilize it somewhere else
     bool xbot_enable_transmission = true;
     
     (*anymap)["HAL"] = boost::any(halInterface);
-    (*anymap)["XBotJoint"] = boost::any(halInterface->getJoint());
-//     (*anymap)["XBotFT"] = boost::any(halInterface->getSensorId(18));
-//     (*anymap)["XBotIMU"] = boost::any(halInterface->getSensorId(104));
-//     (*anymap)["XBotHand"] = boost::any(halInterface->getHandId(19));
     (*anymap)["EnableTransmissionPlugins"] = boost::any(xbot_enable_transmission);
     
     //TODO use isRT from RobotControlInterface robotInterface.IsRt()
