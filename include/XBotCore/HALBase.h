@@ -15,7 +15,7 @@ public:
       return std::dynamic_pointer_cast<XBot::IXBotJoint>(mjoint);
     }
     
-    XBot::IXBotHand::Ptr getHandId(int id){      
+    XBot::IXBotHand::Ptr getHandId(int id){
       return std::dynamic_pointer_cast<XBot::IXBotHand>(mhands[id]);
     }
     
@@ -70,6 +70,10 @@ public:
      
       return 0;
     }
+    
+    virtual int base_start(){};
+    
+    virtual int base_stop() {};
 
 private:
   
