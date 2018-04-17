@@ -94,9 +94,6 @@ private:
     int send_to_slave();    
     
     bool parseYAML ( const std::string& path_to_cfg );
-    static bool computeAbsolutePath(const std::string& input_path,
-                                    const std::string& midlle_path,
-                                    std::string& absolute_path);  // TBD do it with UTILS
     
 protected:
     

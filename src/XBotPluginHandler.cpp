@@ -583,33 +583,6 @@ void PluginHandler::close()
     _pluginhandler_log->flush();
 }
 
-bool PluginHandler::computeAbsolutePath(const std::string& input_path,
-                                        const std::string& middle_path,
-                                        std::string& absolute_path)
-{
-    // if not an absolute path
-    if(!(input_path.at(0) == '/')) {
-        // if you are working with the Robotology Superbuild
-        const char* env_p = std::getenv("ROBOTOLOGY_ROOT");
-        // check the env, otherwise error
-        if(env_p) {
-            std::string current_path(env_p);
-            // default relative path when working with the superbuild
-            current_path += middle_path;
-            current_path += input_path;
-            absolute_path = current_path;
-            return true;
-        }
-        else {
-            Logger::error() << "in " << __func__ << " : the input path  " << input_path << " is neither an absolute path nor related with the robotology superbuild. Download it!" << Logger::endl();
-            return false;
-        }
-    }
-    // already an absolute path
-    absolute_path = input_path;
-    return true;
-}
-
 PluginHandler::~PluginHandler()
 {
     close();

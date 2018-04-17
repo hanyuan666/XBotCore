@@ -56,7 +56,7 @@ CommunicationInterfaceWebServer::CommunicationInterfaceWebServer(XBotInterface::
     } 
     
     std::string droot = "";
-    const char* env_p = std::getenv("ROBOTOLOGY_ROOT");
+    const char* env_p = std::getenv("XBOT_ROOT");
     if( env_p != nullptr && !(strcmp(env_p,"") == 0))
        droot = std::string(env_p) + std::string(DOCUMENT_ROOT);
     

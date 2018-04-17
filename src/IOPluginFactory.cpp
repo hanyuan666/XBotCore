@@ -19,6 +19,7 @@
 
 #include <XCM/IOPluginFactory.h>
 #include <XBotInterface/RtLog.hpp>
+#include <XBotInterface/Utils.h>
 
 using XBot::Logger;
 
@@ -35,7 +36,7 @@ std::shared_ptr<XBot::IOPlugin> IOPluginFactory::getFactory(const std::string& f
 
     char *error;  
     std::string path_to_so;  
-    computeAbsolutePath(file_name, "/build/install/lib/", path_to_so);
+    XBot::Utils::computeAbsolutePath(file_name, "/build/install/lib/", path_to_so);
     path_to_so += std::string(".so");
     void* lib_handle;
     lib_handle = dlopen(path_to_so.c_str(), RTLD_NOW);
@@ -80,29 +81,3 @@ void IOPluginFactory::unloadLib(const std::string& file_name)
   Logger::info() << file_name <<" Plugin unloaded! " << Logger::endl();
 }
 
-bool IOPluginFactory::computeAbsolutePath (  const std::string& input_path,
-                                                        const std::string& middle_path,
-                                                        std::string& absolute_path)
-{
-    // if not an absolute path
-    if(!(input_path.at(0) == '/')) {
-        // if you are working with the Robotology Superbuild
-        const char* env_p = std::getenv("ROBOTOLOGY_ROOT");
-        // check the env, otherwise error
-        if(env_p) {
-            std::string current_path(env_p);
-            // default relative path when working with the superbuild
-            current_path += middle_path;
-            current_path += input_path;
-            absolute_path = current_path;
-            return true;
-        }
-        else {
-            std::cerr << "ERROR in " << __func__ << " : the input path  " << input_path << " is neither an absolute path nor related with the robotology superbuild. Download it!" << std::endl;
-            return false;
-        }
-    }
-    // already an absolute path
-    absolute_path = input_path;
-    return true;
-}

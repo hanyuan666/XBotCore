@@ -47,10 +47,6 @@ private:
   
   static std::map<std::string, void*> handles;
   
-  static bool computeAbsolutePath ( const std::string& input_path,
-                                      const std::string& middle_path,
-                                      std::string& absolute_path );
-  
 
 };
 

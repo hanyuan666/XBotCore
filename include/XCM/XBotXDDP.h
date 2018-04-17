@@ -136,10 +136,6 @@ public:
 
 private:
 
-    static bool computeAbsolutePath (const std::string& input_path,
-                                     const std::string& middle_path,
-                                     std::string& absolute_path);
-
     /**
      * @brief Robot model loaded in XBotCore
      * 

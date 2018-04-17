@@ -49,7 +49,7 @@ bool XBot::HALThread::parseYAML ( const std::string& path_to_cfg )
 
     // check the urdf_filename
     if(x_bot_interface["urdf_path"]) {
-        computeAbsolutePath(x_bot_interface["urdf_path"].as<std::string>(),
+        XBot::Utils::computeAbsolutePath(x_bot_interface["urdf_path"].as<std::string>(),
                             "/",
                             _urdf_path);
     }
@@ -60,7 +60,7 @@ bool XBot::HALThread::parseYAML ( const std::string& path_to_cfg )
 
     // check the srdf_filename
     if(x_bot_interface["srdf_path"]) {
-        computeAbsolutePath(x_bot_interface["srdf_path"].as<std::string>(),
+        XBot::Utils::computeAbsolutePath(x_bot_interface["srdf_path"].as<std::string>(),
                             "/",
                             _srdf_path);
     }
@@ -71,7 +71,7 @@ bool XBot::HALThread::parseYAML ( const std::string& path_to_cfg )
 
     // check joint_map_config
     if(x_bot_interface["joint_map_path"]) {
-        computeAbsolutePath(x_bot_interface["joint_map_path"].as<std::string>(),
+        XBot::Utils::computeAbsolutePath(x_bot_interface["joint_map_path"].as<std::string>(),
                             "/",
                             _joint_map_config);
     }
@@ -80,33 +80,6 @@ bool XBot::HALThread::parseYAML ( const std::string& path_to_cfg )
         return false;
     }
 
-}
-
-bool XBot::HALThread::computeAbsolutePath (const std::string& input_path,
-                                                    const std::string& middle_path,
-                                                    std::string& absolute_path)
-    {
-    // if not an absolute path
-    if(!(input_path.at(0) == '/')) {
-        // if you are working with the Robotology Superbuild
-        const char* env_p = std::getenv("ROBOTOLOGY_ROOT");
-        // check the env, otherwise error
-        if(env_p) {
-            std::string current_path(env_p);
-            // default relative path when working with the superbuild
-            current_path += middle_path;
-            current_path += input_path;
-            absolute_path = current_path;
-            return true;
-        }
-        else {
-            std::cerr << "ERROR in " << __func__ << " : the input path  " << input_path << " is neither an absolute path nor related with the robotology superbuild. Download it!" << std::endl;
-            return false;
-        }
-    }
-    // already an absolute path
-    absolute_path = input_path;
-    return true;
 }
 
 void XBot::HALThread::set_thread_name(std::string thread_name)

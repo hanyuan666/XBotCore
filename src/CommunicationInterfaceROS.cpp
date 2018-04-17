@@ -30,6 +30,7 @@
 #include <fcntl.h>
 
 #include <XBotInterface/SoLib.h>
+#include <XBotInterface/Utils.h>
 
 
 
@@ -184,7 +185,7 @@ void CommunicationInterfaceROS::load_ros_message_interfaces() {
 
     // core YAML
     std::string core_absolute_path;
-    computeAbsolutePath("core.yaml", // NOTE we fixed it.
+    XBot::Utils::computeAbsolutePath("core.yaml", // NOTE we fixed it.
                         "/",
                         core_absolute_path);
     YAML::Node core_cfg = YAML::LoadFile(core_absolute_path);
@@ -198,7 +199,7 @@ void CommunicationInterfaceROS::load_ros_message_interfaces() {
     _control_message_class_name = ctrl_msg_root["subclass_name"].as<std::string>();
     _control_message_path_to_so = ctrl_msg_root["path_to_shared_lib"].as<std::string>();
 
-    computeAbsolutePath(_control_message_path_to_so,
+    XBot::Utils::computeAbsolutePath(_control_message_path_to_so,
                         LIB_MIDDLE_PATH,
                         _control_message_path_to_so
                        );
@@ -218,7 +219,7 @@ void CommunicationInterfaceROS::load_ros_message_interfaces() {
     _jointstate_message_class_name = jointstate_msg_root["subclass_name"].as<std::string>();
     _jointstate_message_path_to_so = jointstate_msg_root["path_to_shared_lib"].as<std::string>();
 
-    computeAbsolutePath(_jointstate_message_path_to_so,
+    XBot::Utils::computeAbsolutePath(_jointstate_message_path_to_so,
                         LIB_MIDDLE_PATH,
                         _jointstate_message_path_to_so
                        );
@@ -702,35 +703,6 @@ bool XBot::CommunicationInterfaceROS::receiveMasterCommunicationInterface(std::s
     else {
         return false;
     }
-}
-
-
-
-bool CommunicationInterfaceROS::computeAbsolutePath (  const std::string& input_path,
-                                                 const std::string& middle_path,
-                                                 std::string& absolute_path)
-{
-    // if not an absolute path
-    if(!(input_path.at(0) == '/')) {
-        // if you are working with the Robotology Superbuild
-        const char* env_p = std::getenv("ROBOTOLOGY_ROOT");
-        // check the env, otherwise error
-        if(env_p) {
-            std::string current_path(env_p);
-            // default relative path when working with the superbuild
-            current_path += middle_path;
-            current_path += input_path;
-            absolute_path = current_path;
-            return true;
-        }
-        else {
-            std::cerr << "ERROR in " << __func__ << " : the input path  " << input_path << " is neither an absolute path nor related with the robotology superbuild. Download it!" << std::endl;
-            return false;
-        }
-    }
-    // already an absolute path
-    absolute_path = input_path;
-    return true;
 }
 
 

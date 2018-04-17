@@ -18,6 +18,7 @@
 */
 
 #include <XCM/XBotXDDP.h>
+#include <XBotInterface/Utils.h>
 
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -32,13 +33,13 @@ XBot::XBotXDDP::XBotXDDP(std::string config_file)
     const YAML::Node& x_bot_core_config = YAML::LoadFile(config_file)["XBotInterface"];
 
     urdf_path = x_bot_core_config["urdf_path"].as<std::string>();
-    computeAbsolutePath(urdf_path, "/", urdf_path);
+    XBot::Utils::computeAbsolutePath(urdf_path, "/", urdf_path);
 
     srdf_path = x_bot_core_config["srdf_path"].as<std::string>();
-    computeAbsolutePath(srdf_path, "/", srdf_path);
+    XBot::Utils::computeAbsolutePath(srdf_path, "/", srdf_path);
 
     joint_map_config = x_bot_core_config["joint_map_path"].as<std::string>();
-    computeAbsolutePath(joint_map_config, "/", joint_map_config);
+    XBot::Utils::computeAbsolutePath(joint_map_config, "/", joint_map_config);
 
     // initialize the model
     if( !model.init( urdf_path, srdf_path, joint_map_config ) ) {
@@ -479,31 +480,4 @@ double XBot::XBotXDDP::get_grasp_state(int hand_id)
 XBot::XBotXDDP::~XBotXDDP()
 {
 //     Logger::info() << "~XBotXDDP()" << Logger::endl();
-}
-
-bool XBot::XBotXDDP::computeAbsolutePath (  const std::string& input_path,
-                                            const std::string& middle_path,
-                                            std::string& absolute_path)
-{
-    // if not an absolute path
-    if(!(input_path.at(0) == '/')) {
-        // if you are working with the Robotology Superbuild
-        const char* env_p = std::getenv("ROBOTOLOGY_ROOT");
-        // check the env, otherwise error
-        if(env_p) {
-            std::string current_path(env_p);
-            // default relative path when working with the superbuild
-            current_path += middle_path;
-            current_path += input_path;
-            absolute_path = current_path;
-            return true;
-        }
-        else {
-            std::cerr << "ERROR in " << __func__ << " : the input path  " << input_path << " is neither an absolute path nor related with the robotology superbuild. Download it!" << std::endl;
-            return false;
-        }
-    }
-    // already an absolute path
-    absolute_path = input_path;
-    return true;
 }
