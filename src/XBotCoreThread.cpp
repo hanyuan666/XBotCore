@@ -95,9 +95,17 @@ XBot::XBotCoreThread::XBotCoreThread(std::string config_yaml,
         iJoint = "libXBotDummyJoint";
 	
         // NOTE dummy needs high level config
-        abs_low_level_config = std::string(config_yaml);
-        
+        abs_low_level_config = std::string(config_yaml);        
     }
+    else if(options.xbotcore_simulator_mode){ 
+
+        lib_file = "libXBotGazeboRos";
+        lib_name = "XBotGazeboRos";
+        iJoint = "libXBotGazeboRosJoint";
+        
+        // NOTE dummy needs high level config
+        abs_low_level_config = std::string(config_yaml);            
+    }    
     else if(hal) // hal provided by constructor
     {
         __hal = hal;
