@@ -74,6 +74,8 @@ public:
     virtual int base_start(){};
     
     virtual int base_stop() {};
+    
+    virtual double getTime() {};
 
 private:
   

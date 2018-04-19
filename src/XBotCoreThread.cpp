@@ -177,7 +177,13 @@ XBot::XBotCoreThread::XBotCoreThread(std::string config_yaml,
 	  }
       }  
     }
-
+    
+    
+    if(options.xbotcore_simulator_mode){ 
+      boost::function<double()> time_func = boost::bind(boost::mem_fn(&HALBase::getTime), boost::ref(halInterface));   
+      time_provider = std::make_shared<XBot::TimeProviderFunction<boost::function<double()>>>(time_func);
+    }      
+        
     controller = std::shared_ptr<ControllerInterface>(new XBot::XBotCore(config_yaml, 
                                                                          halInterface, 
                                                                          shared_memory, 
