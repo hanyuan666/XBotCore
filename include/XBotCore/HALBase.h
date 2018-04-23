@@ -57,10 +57,10 @@ public:
     
     int base_recv(){
       
-      recv_from_slave();
-      recv_devices();   
+      int ret = recv_from_slave();
+      ret += recv_devices();   
       
-      return 0;
+      return ret;
     }
     
     int base_send(){
@@ -96,17 +96,19 @@ private:
         it->second->init();
       }
       
+      return;
     }
    
     int recv_devices(){
       
-      mjoint->recv_from_slave();
+      int ret = mjoint->recv_from_slave();
       
       for (std::map<std::string, HALInterface::Ptr>::iterator it = mlibs.begin(); it != mlibs.end(); ++it)
       {
-        it->second->recv_from_slave();
+        ret += it->second->recv_from_slave();
       }   
       
+      return ret;
     }
     int send_actuators(){
       
@@ -117,7 +119,9 @@ private:
         it->second->send_to_slave();
       }   
       
+      return 0;
     }   
+
     
 };
 

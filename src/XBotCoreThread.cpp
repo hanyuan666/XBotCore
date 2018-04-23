@@ -182,6 +182,13 @@ XBot::XBotCoreThread::XBotCoreThread(std::string config_yaml,
     if(options.xbotcore_simulator_mode){ 
       boost::function<double()> time_func = boost::bind(boost::mem_fn(&HALBase::getTime), boost::ref(halInterface));   
       time_provider = std::make_shared<XBot::TimeProviderFunction<boost::function<double()>>>(time_func);
+      
+      lib =  path_to_shared_lib + "libXBotGazeboRosFT.so";
+      HALInterface::Ptr sensorptrft = SoLib::getFactoryWithArgs<HALInterface>(lib,"SENSORft",halInterface);
+      if (!halInterface->isLoaded("ft")) halInterface->addLib("ft",sensorptrft);
+      lib =  path_to_shared_lib + "libXBotGazeboRosIMU.so";
+      HALInterface::Ptr sensorptrimu = SoLib::getFactoryWithArgs<HALInterface>(lib,"SENSORimu",halInterface);
+      if (!halInterface->isLoaded("imu")) halInterface->addLib("imu",sensorptrimu);
     }      
         
     controller = std::shared_ptr<ControllerInterface>(new XBot::XBotCore(config_yaml, 
