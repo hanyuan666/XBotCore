@@ -30,7 +30,7 @@ bool WebSocketHandler::handleConnection(CivetServer *server, const struct mg_con
 void WebSocketHandler::handleReadyState(CivetServer *server, struct mg_connection *conn) {
    
     std::cout<<"WS ready\n";
-    const char *text = "Hello from XBotCore";
+    const char *text = "{ \"msg\": \"Hello from XBotCore\"} ";
     mg_websocket_write(conn, WEBSOCKET_OPCODE_TEXT, text, strlen(text));    
     sharedData->increaseNumClient();    
 } 
