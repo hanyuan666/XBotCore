@@ -424,14 +424,17 @@ void XBot::PluginHandler::fill_robot_state()
      
         double fault_value = 0;
         double temperature = 0;
+        double aux = 0;
         
         if(!_joint) continue;
         
         _joint->get_fault(id, fault_value);
         _joint->get_temperature(id, temperature);
+        _joint->get_aux(id,aux);
          
         _robot_state_map.at(id).RobotStateRX.fault = fault_value;
         _robot_state_map.at(id).RobotStateRX.temperature = temperature;
+        _robot_state_map.at(id).RobotStateRX.aux = aux;
         
     }
     
