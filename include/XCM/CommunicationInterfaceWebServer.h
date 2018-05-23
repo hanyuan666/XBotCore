@@ -36,7 +36,7 @@
 #define ALLJOINT_URI "/alljoints"
 #define SINGLEJOINT_URI "/singlejoint"
 #define MASTER_URI "/master"
-
+#define MODEL_URI "/model"
 
 namespace XBot {
 

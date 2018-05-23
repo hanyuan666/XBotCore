@@ -75,16 +75,17 @@ CommunicationInterfaceWebServer::CommunicationInterfaceWebServer(XBotInterface::
       server = std::make_shared<CivetServer>(cpp_options);  
     }catch( CivetException e ){ std::cout<<"Port "<< aport <<" already in use from another process"<<std::endl; std::cout<<e.what()<<std::endl; exit(1);}
     ws_civet_handler = std::make_shared<WebSocketHandler>(buffer, sharedData);   
-    server->addWebSocketHandler("/websocket", *ws_civet_handler);  
+    server->addWebSocketHandler("/websocket", *ws_civet_handler);
+    sharedData->model = _robot->getUrdf();
+    
     for ( auto &chainmap : _robot->getChainMap()){
         std::string key =chainmap.first;
         XBot::KinematicChain::Ptr chain = chainmap.second;
         std::vector<std::string> ids;
         //populate ids
         for( int i=0; i<chain->getJointIds().size();i ++){
-          ids.push_back(std::to_string(chain->getJointIds()[i]));
+          ids.push_back(std::to_string(chain->getJointIds()[i])); 
         }
-        
         std::vector<std::string> names = chain->getJointNames();
         std::vector<std::string> jvals, vval, eval, pref, vref, eref, stiff, damp;
         //populate jvals
@@ -284,6 +285,7 @@ bool CommunicationInterfaceWebServer::advertiseSwitch(const std::string& port_na
     server->addHandler(PLUGIN_URI, *http_civet_handler);
     server->addHandler(STATE_URI, *http_civet_handler);
     server->addHandler(CHAINS_URI, *http_civet_handler);
+    server->addHandler(MODEL_URI, *http_civet_handler);
     sharedData->insertSwitch(port_name, "");
     
     return true;
