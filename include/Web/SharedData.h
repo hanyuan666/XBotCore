@@ -82,6 +82,8 @@ class SharedData {
     std::shared_ptr<Buffer<std::vector<double>>> external_command;
     
     urdf::ModelInterface model;
+    
+    std::map<std::string, int> ft_sensors;
      
   private:
        

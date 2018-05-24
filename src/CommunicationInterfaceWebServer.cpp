@@ -78,6 +78,14 @@ CommunicationInterfaceWebServer::CommunicationInterfaceWebServer(XBotInterface::
     server->addWebSocketHandler("/websocket", *ws_civet_handler);
     sharedData->model = _robot->getUrdf();
     
+    for (auto &t :  _robot->getForceTorque()){
+	std::string s =t.first;
+	XBot::ForceTorqueSensor::ConstPtr sensor =  t.second;
+	int id = sensor->getSensorId();
+	sharedData->ft_sensors[s]= id;
+    }
+
+    
     for ( auto &chainmap : _robot->getChainMap()){
         std::string key =chainmap.first;
         XBot::KinematicChain::Ptr chain = chainmap.second;
