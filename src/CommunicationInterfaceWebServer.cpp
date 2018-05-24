@@ -69,7 +69,7 @@ CommunicationInterfaceWebServer::CommunicationInterfaceWebServer(XBotInterface::
     }      
     
     numjoint = _robot->getJointNum();
-    buffer = std::make_shared<Buffer<WebRobotStateTX>>(50);    
+    buffer = std::make_shared<Buffer<WebRobotStateTX>>(50);  
     sharedData = std::make_shared<SharedData>();
     try{
       server = std::make_shared<CivetServer>(cpp_options);  
@@ -151,6 +151,22 @@ void CommunicationInterfaceWebServer::sendRobotState()
     _robot->getVelocityReference(vel_ref_id_map);
     _robot->getEffortReference(eff_ref_id_map);
     
+    WebFTSensor ftsensor;
+    
+    for (auto &t :  _robot->getForceTorque()){
+	std::string s =t.first;
+	XBot::ForceTorqueSensor::ConstPtr sensor =  t.second;
+	Eigen::Vector3d force;
+	sensor->getForce(force);
+	Eigen::Vector3d torque;
+	sensor->getForce(torque);
+	int id = sensor->getSensorId();
+	ftsensor.ft_id.push_back(id);
+	ftsensor.ft_name.push_back(s);
+	ftsensor.force.push_back(WebFTSensor::Vector3(force[0],force[1], force[2]));
+	ftsensor.torque.push_back(WebFTSensor::Vector3(torque[0],torque[1], torque[2]));
+    }
+    
     WebRobotStateTX rstate;  
     
     for ( auto s: _robot->getEnabledJointNames()) {      
@@ -193,6 +209,8 @@ void CommunicationInterfaceWebServer::sendRobotState()
         rstate.vel_ref.push_back(vel_ref);
         rstate.effort_ref.push_back(eff_ref);
     }
+    
+    rstate.ftsensor = ftsensor;
     
     if(sharedData->getNumClient().load() <= 0) {
         buffer->clear();

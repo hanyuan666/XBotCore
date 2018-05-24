@@ -124,10 +124,9 @@ bool WebSocketHandler::handleData(CivetServer *server,
     buffer.Clear();
     if(resp){      
         rstate.serialize(buffer);
-        btosend = buffer.GetString();
-        //std::cout<<"pos"<<std::string((char*)btosend)<<std::endl;
+	btosend = buffer.GetString();
     }
-        
+    
     if( btosend!=nullptr)
         mg_websocket_write(conn, WEBSOCKET_OPCODE_TEXT, btosend, buffer.GetLength());
         
