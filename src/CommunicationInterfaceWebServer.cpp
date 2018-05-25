@@ -167,7 +167,7 @@ void CommunicationInterfaceWebServer::sendRobotState()
 	Eigen::Vector3d force;
 	sensor->getForce(force);
 	Eigen::Vector3d torque;
-	sensor->getForce(torque);
+	sensor->getTorque(torque);
 	int id = sensor->getSensorId();
 	ftsensor.ft_id.push_back(id);
 	ftsensor.ft_name.push_back(s);
