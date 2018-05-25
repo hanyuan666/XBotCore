@@ -126,9 +126,11 @@ bool WebSocketHandler::handleData(CivetServer *server,
         rstate.serialize(buffer);
 	btosend = buffer.GetString();
     }
-    
+    const char* str = "{ \"msg\": \"go\"}"; 
     if( btosend!=nullptr)
         mg_websocket_write(conn, WEBSOCKET_OPCODE_TEXT, btosend, buffer.GetLength());
+    else
+	mg_websocket_write(conn, WEBSOCKET_OPCODE_TEXT, str, strlen(str));
         
     return true;
 }  
