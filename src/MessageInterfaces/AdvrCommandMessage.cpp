@@ -86,12 +86,12 @@ bool XBot::CommandAdvr::service_callback(XBotCore::advr_controller_joint_namesRe
 }
 
 
-bool XBot::CommandAdvr::init(const std::string& path_to_config_file, XBot::GenericControlMessage::Type type)
+bool XBot::CommandAdvr::init(const ConfigOptions& cfg, XBot::GenericControlMessage::Type type)
 {
 
     Logger::info("Initializing CommandAdvr message interface\n");
     
-    std::string robot_name = XBot::ModelInterface::getModel(path_to_config_file)->getUrdf().getName();
+    std::string robot_name = XBot::ModelInterface::getModel(cfg)->getUrdf().getName();
     std::string joint_service_name = "/" + robot_name + "/position_controller/get_joint_names";
     std::string command_topic_name = "/xbotcore/" + robot_name + "/command";
 
@@ -107,7 +107,7 @@ bool XBot::CommandAdvr::init(const std::string& path_to_config_file, XBot::Gener
                             &XBot::CommandAdvr::callback, this, 
                             ros::TransportHints().tcpNoDelay());
 
-        auto robot = XBot::RobotInterface::getRobot(path_to_config_file, "xddp_robot");
+        auto robot = XBot::RobotInterface::getRobot(cfg, "xddp_robot");
         robot->sense();
 
         XBot::JointNameMap _joint_pos, _joint_stiffness, _joint_damping;
