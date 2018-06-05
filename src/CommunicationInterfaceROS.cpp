@@ -174,8 +174,13 @@ void CommunicationInterfaceROS::load_robot_state_publisher()
     _robot_state_pub = std::make_shared<robot_state_publisher_advr::RobotStatePublisher>(kdl_tree);
 
     _urdf_param_name = "/xbotcore/" + _robot->getUrdf().getName() + "/robot_description";
+    std::string srdf_param_name = "/xbotcore/" + _robot->getUrdf().getName() + "/robot_description_semantic";
+    std::string jidmap_param_name = "/xbotcore/" + _robot->getUrdf().getName() + "/robot_description_joint_id_map";
     _tf_prefix = "/xbotcore/" + _robot->getUrdf().getName();
+    
     _nh->setParam(_urdf_param_name, _robot->getUrdfString());
+    _nh->setParam(srdf_param_name, _robot->getSrdfString());
+    _nh->setParam(jidmap_param_name, _robot->getConfigOptions().get_joint_id_map());
 
 }
 
