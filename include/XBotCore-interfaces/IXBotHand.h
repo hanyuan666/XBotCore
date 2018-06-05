@@ -42,9 +42,9 @@ public:
     
     virtual bool grasp(int hand_id, double grasp_percentage) = 0;
     
-    virtual double get_grasp_state(int hand_id) = 0;
-   
-    // TBD grasp force?
+    virtual bool move_finger(int hand_id, int finger_id, double percentage) { return false; };
+    
+    virtual double get_grasp_state(int hand_id) = 0; //TBD remove it
 
 
 };
