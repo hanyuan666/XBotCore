@@ -135,14 +135,16 @@ void XBot::XBotCore::init_internal()
     // TODO initilize it somewhere else
     bool xbot_enable_transmission = true;
     
-    (*anymap)["XBotJoint"] = boost::any(xbot_joint);
-    (*anymap)["XBotFT"] = boost::any(xbot_ft);
-    (*anymap)["XBotIMU"] = boost::any(xbot_imu);
-    (*anymap)["XBotHand"] = boost::any(xbot_hand);
-    (*anymap)["EnableTransmissionPlugins"] = boost::any(xbot_enable_transmission);
+    auto cfg = ConfigOptions::FromConfigFile(_path_to_config);
+    cfg.set_parameter("XBotJoint", xbot_joint);
+    cfg.set_parameter("XBotFT", xbot_ft);
+    cfg.set_parameter("XBotIMU", xbot_imu);
+    cfg.set_parameter("XBotHand", xbot_hand);
+    cfg.set_parameter("EnableTransmissionPlugins", xbot_enable_transmission);
+    cfg.set_parameter<std::string>("framework", "XBotRT");
     
     //TODO use isRT from RobotControlInterface robotInterface.IsRt()
-    _robot = XBot::RobotInterface::getRobot(_path_to_config, "", anymap, "XBotRT");
+    _robot = XBot::RobotInterface::getRobot(cfg);
     
     // create time provider function
     boost::function<double()> time_func = boost::bind(&XBot::XBotCore::get_time, this);
