@@ -11,6 +11,8 @@ public:
     
     typedef std::shared_ptr<HALBase> Ptr;
     
+    virtual ~HALBase(){};
+    
     XBot::IXBotJoint::Ptr getJoint(){      
       return std::dynamic_pointer_cast<XBot::IXBotJoint>(mjoint);
     }
@@ -76,6 +78,27 @@ public:
     virtual int base_stop() {};
     
     virtual double getTime() {};
+    
+    void clearAll(){
+        
+        mjoint.reset();
+        
+        for (std::map<std::string, HALInterface::Ptr>::iterator it = mlibs.begin(); it != mlibs.end(); ++it)
+      {
+        it->second.reset();
+      }
+      
+       for (std::map<int, HALInterface::Ptr>::iterator it = msensors.begin(); it != msensors.end(); ++it)
+      {
+        it->second.reset();
+      }
+      
+       for (std::map<int, HALInterface::Ptr>::iterator it = mhands.begin(); it != mhands.end(); ++it)
+      {
+        it->second.reset();
+      }
+        
+    }
 
 private:
   

@@ -83,8 +83,7 @@ XBot::XBotCoreThread::XBotCoreThread(std::string config_yaml,
     std::string  iJoint="";
     
     HALInterface::Ptr __hal;
-    HALBase::Ptr halInterface;
-    
+        
     std::string path_to_shared_lib;
     path_to_shared_lib = XBot::Utils::computeAbsolutePath("build/install/lib/");
     
@@ -246,4 +245,5 @@ void XBot::XBotCoreThread::th_loop( void * ){
 XBot::XBotCoreThread::~XBotCoreThread() {
     
    Logger::info() << "~XBotCoreThread()" << Logger::endl();
+   halInterface->clearAll();
 }

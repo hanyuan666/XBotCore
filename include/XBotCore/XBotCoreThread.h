@@ -76,6 +76,7 @@ public:
 private:
     
     std::shared_ptr<ControllerInterface> controller;
+    HALBase::Ptr halInterface;
     
     /**
      * @brief The thread name
