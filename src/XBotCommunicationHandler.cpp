@@ -191,6 +191,7 @@ void XBot::CommunicationHandler::th_init(void*)
     cfg.set_parameter("XBotIMU", xbot_imu);
     cfg.set_parameter("XBotHand", xbot_hand);
     cfg.set_parameter<bool>("EnableTransmissionPlugins", false);
+    cfg.set_parameter<bool>("EnableReferenceReading", true);
     cfg.set_parameter<std::string>("framework", "XBotRT");
     
     //TODO use isRT from RobotControlInterface robotInterface.IsRt()
