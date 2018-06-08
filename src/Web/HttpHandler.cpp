@@ -21,6 +21,16 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 
+namespace urdf {
+    typedef  boost::shared_ptr<Link> LinkSharedPtr;
+    typedef  boost::shared_ptr<const Link> LinkConstSharedPtr;
+    typedef  boost::shared_ptr<Joint> JointSharedPtr;
+    typedef  boost::shared_ptr<const Joint> JointConstSharedPtr;
+    typedef  boost::shared_ptr<Material> MaterialSharedPtr;
+    typedef  boost::shared_ptr<const Material> MaterialConstSharedPtr;
+}
+
+
 HttpHandler::HttpHandler (std::shared_ptr<SharedData>& sharedData, std::shared_ptr<Buffer<WebRobotStateTX>>& buffer){
       
       this->sharedData = sharedData;
