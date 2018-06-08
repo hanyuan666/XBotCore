@@ -22,8 +22,7 @@
 XBot::HALThread::HALThread(const char * config)   
 {
     _path_to_config = XBot::Utils::getXBotConfig();
-    int c_period = 1;
-    done = false;      
+    int c_period = 1;     
     set_thread_name("R-HAL");    
     set_thread_period(c_period);   
     set_thread_priority();    
@@ -161,8 +160,89 @@ void XBot::HALThread::init(){
     }
     // generate the robot
     _XBotModel.generate_robot();
-    _XBotModel.get_enabled_joint_names(_jointNames);
-    _XBotModel.get_enabled_joint_ids(_jointId);
+    
+    std::shared_ptr<HALInterface> tmp = std::shared_ptr<HALInterface>(this);
+    mjoint = std::shared_ptr<HALJoint>(new XBot::HALJoint(tmp));
+    setJoint(mjoint);
+    this->create(true,1);
+}
+
+int XBot::HALThread::recv_from_slave(){
+  return 0;
+}
+
+int XBot::HALThread::send_to_slave(){
+  return 0;
+}
+
+void XBot::HALThread::th_init( void * ){
+    
+    Logger::info() << "INIT R-HAL thread"<< Logger::endl();
+    _hal_log = XBot::MatLogger::getLogger("/tmp/hal_log");
+    init_internal();
+}
+
+void XBot::HALThread::th_loop( void * ){  
+   
+    mjoint->loop();
+    _hal_log->add("hal_time", XBot::get_time_ns() / 1e9 );
+}
+
+XBot::HALThread::~HALThread() {
+    
+    Logger::info() << "~HALThread()" << Logger::endl();
+    this->stop();
+    this->join();
+}
+
+void XBot::HALThread::get_robot_state(double* jnt, double* torq, double* vel, double* stiff, double* damp)
+{
+   mjoint->get_robot_state(jnt,torq,vel,stiff,damp);
+}
+
+void XBot::HALThread::set_robot_state(const double* jnt, const double* torq, const double* vel, const double* stiff, const double* damp)
+{
+   mjoint->set_robot_state(jnt,torq,vel,stiff,damp);
+}
+
+void XBot::HALThread::set_robot_jnt_ref(const double* jntref)
+{
+   mjoint->set_robot_jnt_ref(jntref);
+}
+
+void XBot::HALThread::get_robot_state(float* jnt, float* torq, float* vel, float* stiff, float* damp)
+{
+   mjoint->get_robot_state(jnt,torq,vel,stiff,damp);
+}
+
+void XBot::HALThread::set_robot_state(const float* jnt, const float* torq, const float* vel, const float* stiff, const float* damp)
+{
+   mjoint->set_robot_state(jnt,torq,vel,stiff,damp);
+}
+
+void XBot::HALThread::set_robot_jnt_ref(const float* jntref)
+{
+   mjoint->set_robot_jnt_ref(jntref);
+}
+
+//JOINT
+
+
+XBot::HALJoint::HALJoint(HALInterface::Ptr hal): _hal(hal)
+{
+  done = false; 
+  
+}
+
+XBot::HALJoint::~HALJoint(){
+   
+}
+
+void XBot::HALJoint::init(){
+  
+    mhalThread = std::static_pointer_cast<XBot::HALThread>(_hal);
+    mhalThread->_XBotModel.get_enabled_joint_names(_jointNames);
+    mhalThread->_XBotModel.get_enabled_joint_ids(_jointId);
     num_joint = _jointId.size();
     
     for( int n : _jointId){
@@ -182,20 +262,26 @@ void XBot::HALThread::init(){
       _shgainRefMap[n] = {0, 0, 0, 0, 0};
     }
     
-    for( auto& pair : _XBotModel.get_hands()){      
-      std::string hand_name= pair.first;
-      int hand_id = pair.second;
-      _status_grasp[hand_id] = 0.0;      
-    }    
     
     pthread_mutex_init(&w_mutex, NULL);
     pthread_mutex_init(&mutex, NULL);
     pthread_cond_init( &cond, NULL);
-    this->create(true,1);
     recv_from_slave();
 }
 
-int XBot::HALThread::recv_from_slave(){
+int XBot::HALJoint::loop()
+{
+    int resp = mhalThread->read();
+    mhalThread->write();
+    pthread_mutex_lock( &mutex );
+    pthread_cond_signal( &cond ); 
+    done = !resp;
+    pthread_mutex_unlock( & mutex );
+    
+    return 0;
+}
+
+int XBot::HALJoint::recv_from_slave(){
   
     pthread_mutex_lock( &mutex );
     while(!done){
@@ -206,45 +292,24 @@ int XBot::HALThread::recv_from_slave(){
     _jointVelMap = _shvelValMap;
     _jointTorqMap = _shtorqueValMap;
     _gainMap = _shgainMap;
-    pthread_mutex_unlock( & mutex );     
+    pthread_mutex_unlock( & mutex );  
+    
+    return 0;
 }
 
-int XBot::HALThread::send_to_slave(){
+int XBot::HALJoint::send_to_slave(){
   
     pthread_mutex_lock( &w_mutex );
     _shjointRefMap = _jointRefMap;
     _shtorqueRefMap = _jointTorqRefMap;
     _shvelRefMap = _jointVelRefMap;
     _shgainRefMap = _gainRefMap;
-    pthread_mutex_unlock( &w_mutex );   
-}
-
-void XBot::HALThread::th_init( void * ){
+    pthread_mutex_unlock( &w_mutex );  
     
-    Logger::info() << "INIT R-HAL thread"<< Logger::endl();
-    _hal_log = XBot::MatLogger::getLogger("/tmp/hal_log");
-    init_internal();
+    return 0;
 }
 
-void XBot::HALThread::th_loop( void * ){  
-   
-    int resp = read();
-    write();
-    pthread_mutex_lock( &mutex );
-    pthread_cond_signal( &cond ); 
-    done = !resp;
-    pthread_mutex_unlock( & mutex );
-    _hal_log->add("hal_time", XBot::get_time_ns() / 1e9 );
-}
-
-XBot::HALThread::~HALThread() {
-    
-    Logger::info() << "~HALThread()" << Logger::endl();
-    this->stop();
-    this->join();
-}
-
-void XBot::HALThread::get_robot_state(double* jnt, double* torq, double* vel, double* stiff, double* damp)
+void XBot::HALJoint::get_robot_state(double* jnt, double* torq, double* vel, double* stiff, double* damp)
 {
     pthread_mutex_lock( &w_mutex );
     for( int n=0; n<num_joint; n++){
@@ -262,7 +327,7 @@ void XBot::HALThread::get_robot_state(double* jnt, double* torq, double* vel, do
     pthread_mutex_unlock( & w_mutex );  
 }
 
-void XBot::HALThread::set_robot_state(const double* jnt, const double* torq, const double* vel, const double* stiff, const double* damp)
+void XBot::HALJoint::set_robot_state(const double* jnt, const double* torq, const double* vel, const double* stiff, const double* damp)
 {
     pthread_mutex_lock( &mutex );    
     for (int t=0; t<num_joint; t++){
@@ -280,7 +345,7 @@ void XBot::HALThread::set_robot_state(const double* jnt, const double* torq, con
     pthread_mutex_unlock( &mutex );  
 }
 
-void XBot::HALThread::set_robot_jnt_ref(const double* jntref)
+void XBot::HALJoint::set_robot_jnt_ref(const double* jntref)
 {
    if (jntref != nullptr)
     for (int t=0; t<num_joint; t++){
@@ -289,7 +354,7 @@ void XBot::HALThread::set_robot_jnt_ref(const double* jntref)
     } 
 }
 
-void XBot::HALThread::get_robot_state(float* jnt, float* torq, float* vel, float* stiff, float* damp)
+void XBot::HALJoint::get_robot_state(float* jnt, float* torq, float* vel, float* stiff, float* damp)
 {
     pthread_mutex_lock( &w_mutex );
     for( int n=0; n<num_joint; n++){
@@ -307,7 +372,7 @@ void XBot::HALThread::get_robot_state(float* jnt, float* torq, float* vel, float
     pthread_mutex_unlock( & w_mutex );  
 }
 
-void XBot::HALThread::set_robot_state(const float* jnt, const float* torq, const float* vel, const float* stiff, const float* damp)
+void XBot::HALJoint::set_robot_state(const float* jnt, const float* torq, const float* vel, const float* stiff, const float* damp)
 {
     pthread_mutex_lock( &mutex );    
     for (int t=0; t<num_joint; t++){
@@ -325,7 +390,7 @@ void XBot::HALThread::set_robot_state(const float* jnt, const float* torq, const
     pthread_mutex_unlock( &mutex );  
 }
 
-void XBot::HALThread::set_robot_jnt_ref(const float* jntref)
+void XBot::HALJoint::set_robot_jnt_ref(const float* jntref)
 {
     if (jntref != nullptr)
       for (int t=0; t<num_joint; t++){
@@ -333,168 +398,120 @@ void XBot::HALThread::set_robot_jnt_ref(const float* jntref)
         _jointRefMap[t] = jntref[t];
       } 
 }
-////////////////////////////////////
-////////////////////////////////////
-// SINGLE JOINT PRIVATE FUNCTIONS //
-////////////////////////////////////
-////////////////////////////////////
 
-bool XBot::HALThread::get_link_pos(int joint_id, double& link_pos)
+bool XBot::HALJoint::get_link_pos(int joint_id, double& link_pos)
 {
     link_pos = _jointValMap[joint_id];
     return true;   
 }
 
-bool XBot::HALThread::get_motor_pos(int joint_id, double& motor_pos)
+bool XBot::HALJoint::get_motor_pos(int joint_id, double& motor_pos)
 {
     motor_pos = _jointValMap[joint_id];
     return true; 
 }
 
-bool XBot::HALThread::get_link_vel(int joint_id, double& link_vel)
+bool XBot::HALJoint::get_link_vel(int joint_id, double& link_vel)
 {
     link_vel = _jointVelMap[joint_id];
     return true;  
 }
 
-bool XBot::HALThread::get_motor_vel(int joint_id, double& motor_vel)
+bool XBot::HALJoint::get_motor_vel(int joint_id, double& motor_vel)
 {
     motor_vel = _jointVelMap[joint_id];
     return true;  
 }
 
-bool XBot::HALThread::get_torque(int joint_id, double& torque)
+bool XBot::HALJoint::get_torque(int joint_id, double& torque)
 {
     torque = _jointTorqMap[joint_id];    
     return true; 
 }
 
-bool XBot::HALThread::get_temperature(int joint_id, double& temperature)
+bool XBot::HALJoint::get_temperature(int joint_id, double& temperature)
 {
     return false; 
 }
 
-bool XBot::HALThread::get_fault(int joint_id, double& fault)
+bool XBot::HALJoint::get_fault(int joint_id, double& fault)
 {
     return false; 
 }
 
-bool XBot::HALThread::get_rtt(int joint_id, double& rtt)
+bool XBot::HALJoint::get_rtt(int joint_id, double& rtt)
 {
     return false;   
 }
 
-bool XBot::HALThread::get_op_idx_ack(int joint_id, double& op_idx_ack)
+bool XBot::HALJoint::get_op_idx_ack(int joint_id, double& op_idx_ack)
 {
     return false;   
 }
 
-bool XBot::HALThread::get_aux(int joint_id, double& aux)
+bool XBot::HALJoint::get_aux(int joint_id, double& aux)
 {
     return false;
 }
 
-bool XBot::HALThread::get_gains(int joint_id, std::vector< double >& gain_vector)
+bool XBot::HALJoint::get_gains(int joint_id, std::vector< double >& gain_vector)
 {
     gain_vector = _gainMap[joint_id];            
     return true; 
 }
    
-bool XBot::HALThread::get_vel_ref(int joint_id, double& vel_ref) {
+bool XBot::HALJoint::get_vel_ref(int joint_id, double& vel_ref) {
   
     vel_ref = _jointVelRefMap[joint_id];
     return true;
 }
     
-bool XBot::HALThread::get_tor_ref(int joint_id, double& tor_ref) {
+bool XBot::HALJoint::get_tor_ref(int joint_id, double& tor_ref) {
   
     tor_ref = _jointTorqRefMap[joint_id];
     return true;
 }
 
-bool XBot::HALThread::set_pos_ref(int joint_id, const double& pos_ref)
+bool XBot::HALJoint::set_pos_ref(int joint_id, const double& pos_ref)
 {
     _jointRefMap[joint_id] = pos_ref;
     return true; 
 }
 
-bool XBot::HALThread::set_vel_ref(int joint_id, const double& vel_ref)
+bool XBot::HALJoint::set_vel_ref(int joint_id, const double& vel_ref)
 {
     _jointVelRefMap[joint_id] = vel_ref;
     return true; 
 }
 
-bool XBot::HALThread::set_tor_ref(int joint_id, const double& tor_ref)
+bool XBot::HALJoint::set_tor_ref(int joint_id, const double& tor_ref)
 {
     _jointTorqRefMap[joint_id] = tor_ref;    
     return true; 
 }
 
-bool XBot::HALThread::set_gains(int joint_id, const std::vector<double>& gains)
+bool XBot::HALJoint::set_gains(int joint_id, const std::vector<double>& gains)
 {
     _gainRefMap[joint_id] = gains;
     return true; 
 }
  
-bool XBot::HALThread::set_fault_ack(int joint_id, const double& fault_ack)
+bool XBot::HALJoint::set_fault_ack(int joint_id, const double& fault_ack)
 {       
     return false; 
 }
 
-bool XBot::HALThread::set_ts(int joint_id, const double& ts)
+bool XBot::HALJoint::set_ts(int joint_id, const double& ts)
 {    
     return false; 
 }
 
-bool XBot::HALThread::set_op_idx_aux(int joint_id, const double& op_idx_aux)
+bool XBot::HALJoint::set_op_idx_aux(int joint_id, const double& op_idx_aux)
 {
     return false; 
 }
 
-bool XBot::HALThread::set_aux(int joint_id, const double& aux)
+bool XBot::HALJoint::set_aux(int joint_id, const double& aux)
 {    
     return false; 
-}
-
-bool XBot::HALThread::get_ft(int ft_id, std::vector< double >& ft, int channels)
-{    
-    return false;   
-}
-
-bool XBot::HALThread::get_ft_fault(int ft_id, double& fault)
-{   
-    return false;  
-}
-
-bool XBot::HALThread::get_ft_rtt(int ft_id, double& rtt)
-{
-    return false;   
-}
-
-bool XBot::HALThread::get_imu(int imu_id, 
-                             std::vector< double >& lin_acc, 
-                             std::vector< double >& ang_vel, 
-                             std::vector< double >& quaternion)
-{
-    return false;   
-}
-
-bool XBot::HALThread::get_imu_fault(int imu_id, double& fault)
-{
-    return false; 
-}
-
-bool XBot::HALThread::get_imu_rtt(int imu_id, double& rtt)
-{
-    return false; 
-}
-
-bool XBot::HALThread::grasp(int hand_id, double grasp_percentage)
-{    
-    return false; 
-}
-
-double XBot::HALThread::get_grasp_state(int hand_id)
-{    
-    return -1;   
 }

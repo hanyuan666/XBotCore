@@ -41,6 +41,7 @@
 #include <XBotCore/ControllerInterface.h>
 #include <XCM/Loader.h>
 #include <XBotCore/XBotLoaderThread.h>
+#include <XBotCore/HALBase.h>
 
 namespace XBot
 {
@@ -57,11 +58,7 @@ class XBot::XBotCore : public ControllerInterface
 public:
     
     XBotCore(std::string config_yaml, 
-             XBot::SharedMemory::Ptr shmem, 
-             Options options);
-    
-    XBotCore(std::string config_yaml, 
-             std::shared_ptr<HALInterface> halInterface, 
+             std::shared_ptr<HALBase> halInterface, 
              XBot::SharedMemory::Ptr shmem,
              Options options,
              std::shared_ptr<XBot::TimeProviderFunction<boost::function<double()>>> time_provider = nullptr
@@ -97,7 +94,7 @@ private:
     
     const Options _options;
   
-    std::shared_ptr<HALInterface> halInterface;
+    HALBase::Ptr halInterface;
     
     std::shared_ptr<XBot::TimeProviderFunction<boost::function<double()>>> _time_provider;
     

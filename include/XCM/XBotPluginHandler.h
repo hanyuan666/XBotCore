@@ -33,7 +33,7 @@
 
 #include <XBotCore-interfaces/XBotHandle.h>
 #include <XBotCore-interfaces/XBotOptions.h>
-#include <XBotCore/HALInterface.h>
+#include <XBotCore/HALBase.h>
 
 namespace XBot {
 
@@ -48,14 +48,14 @@ namespace XBot {
                        TimeProvider::Ptr time_provider,
                        XBot::SharedMemory::Ptr shared_memory,
                        Options options,
-                       std::shared_ptr<HALInterface> halInterface = nullptr
+                       std::shared_ptr<HALBase> halInterface = nullptr
                      );
         
         void update_plugins_set_name(const std::string& plugins_set_name);
 
         bool load_plugins();
 
-        bool init_plugins(std::shared_ptr<HALInterface> halInterface   = nullptr,
+        bool init_plugins(std::shared_ptr<HALBase> halInterface   = nullptr,
                           std::shared_ptr< IXBotModel > model   = nullptr );
 
         void run();
@@ -152,7 +152,7 @@ namespace XBot {
         std::map< std::string, std::shared_ptr<XBot::XBotControlPlugin> > pluginMap;
         std::map < std::string , int > pluginPos;
         
-        std::shared_ptr<HALInterface> _halInterface;
+        std::shared_ptr<HALBase> _halInterface;
 
         int _communication_plugin_idx;
         int _logging_plugin_idx;

@@ -22,6 +22,8 @@
 void WebRobotStateTX::serialize(StringBuffer& buffer){
       
         Writer<StringBuffer> writer(buffer);
+	writer.StartObject();
+	writer.Key("Robot");
         writer.StartObject();  
         serializeArray(writer,"joint_name",joint_name);
         serializeArray(writer,"joint_id",joint_id);
@@ -36,7 +38,18 @@ void WebRobotStateTX::serialize(StringBuffer& buffer){
         serializeArray(writer,"pos_ref",position_ref);
         serializeArray(writer,"vel_ref",vel_ref);
         serializeArray(writer,"eff_ref",effort_ref);
-        writer.EndObject();  
+        serializeArray(writer,"fault",fault);
+        serializeArray(writer,"aux",aux);
+        writer.EndObject();
+	
+	writer.Key("Sensors");
+	writer.StartObject();  
+	serializeArray(writer,"ft_name", ftsensor.ft_name);
+	serializeArray(writer,"ft_id",ftsensor.ft_id);
+	ftsensor.serializeArray(writer,"force",ftsensor.force);
+	ftsensor.serializeArray(writer,"torque", ftsensor.torque);
+	writer.EndObject();  
+	writer.EndObject();  
 }
 
 //template <typename T>
@@ -74,4 +87,21 @@ void WebRobotStateTX::serializeArray(Writer<StringBuffer>& writer, std::string k
     }
     writer.EndArray();
     // writer.EndObject();  
+}
+
+void WebFTSensor::serializeArray(Writer< StringBuffer >& writer, std::string key, std::vector< WebFTSensor::Vector3 >& array)
+{
+    writer.Key(key.c_str());   
+    writer.StartArray();
+    for( Vector3 val : array ){  
+      writer.StartObject(); 
+      writer.Key("Vector");
+      writer.StartArray();
+      writer.Double(val.x);
+      writer.Double(val.y);
+      writer.Double(val.z);
+      writer.EndArray();
+      writer.EndObject(); 
+    }
+    writer.EndArray();
 }

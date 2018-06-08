@@ -98,6 +98,7 @@ int main(int argc, char *argv[]) try {
             ("period", po::value<int>(), "XBotCore thread period [us]")
             ("ch-period", po::value<int>(), "CommunicationHandler thread period [us]")
             ("dummy,D", "Use the dummy HAL implementation.")
+            ("simulator,S", "Use the XBotGazeboRos HAL implementation.")
             ("verbose,V", "Verbose mode.")
             ("help", "Shows this help message.")
             
@@ -148,6 +149,10 @@ int main(int argc, char *argv[]) try {
         
         if(vm.count("dummy")) {
             options.xbotcore_dummy_mode = true;
+        }
+        
+        if(vm.count("simulator")) {
+            options.xbotcore_simulator_mode = true;
         }
         
         if(vm.count("dont-catch")){

@@ -25,18 +25,18 @@
 #include <XCM/XBotThread.h>
 #include <memory>
 
-
 namespace XBot
 {
     class HALThread;  
+    class HALJoint;
 }
 
-
-class XBot::HALThread : public HALInterface, XBot::Thread_hook
-                        
+class XBot::HALThread : public HALBase, public XBot::Thread_hook
 {
-public:    
-       
+public:   
+  
+    friend class XBot::HALJoint;
+    
     HALThread(const char * config);
     
     virtual ~HALThread();    
@@ -55,39 +55,13 @@ public:
 private:    
 
     std::string thread_name;    
-    bool done; 
     XBot::MatLogger::Ptr _hal_log;
-    pthread_mutex_t mutex;
-    pthread_cond_t cond;
-    pthread_mutex_t w_mutex;
     XBot::XBotCoreModel _XBotModel;    
     std::string _urdf_path;
     std::string _srdf_path;
     std::string _joint_map_config;
     std::string _path_to_config;
-    std::vector<std::string> _jointNames;
-    std::vector<int> _jointId;
-    int num_joint;
-      
-    std::map<int , double> _jointValMap;
-    std::map<int , double> _jointRefMap;
-    std::map<int , double> _jointVelMap;
-    std::map<int , double> _jointVelRefMap;
-    std::map<int , double> _jointTorqMap;
-    std::map<int , double> _jointTorqRefMap;
-    std::map<int , std::vector< double >> _gainMap;
-    std::map<int , std::vector< double >> _gainRefMap;
-    std::map<int, double> _status_grasp;
-
-    //SHARED DATA
-    std::map<int , double> _shjointValMap;
-    std::map<int , double> _shjointRefMap;    
-    std::map<int , double> _shtorqueRefMap;      
-    std::map<int , double> _shtorqueValMap;
-    std::map<int , double> _shvelRefMap;      
-    std::map<int , double> _shvelValMap;
-    std::map<int , std::vector< double >> _shgainMap;
-    std::map<int , std::vector< double >> _shgainRefMap;
+    std::shared_ptr<XBot::HALJoint> mjoint;
     
     void init();
     int recv_from_slave();
@@ -112,21 +86,60 @@ protected:
     void set_robot_jnt_ref(const double* jntref);
     void set_robot_state(const float* jnt, const float* torq, const float* vel, const float* stiff = nullptr, const float* damp = nullptr);
     void get_robot_state(float* jnt, float* torq, float* vel, float* stiff, float* damp);
-    void set_robot_jnt_ref(const float* jntref);;
+    void set_robot_jnt_ref(const float* jntref);
     
-    // NOTE IXBotHand getters/setters
-    virtual double get_grasp_state(int hand_id);
-    virtual bool   grasp(int hand_id, double grasp_percentage);
+};
+
+class XBot::HALJoint : public HALInterface, public XBot::IXBotJoint
+{
+public:    
+    friend class XBot::HALThread;
+    HALJoint(HALInterface::Ptr);
+    virtual ~HALJoint();
     
-    // NOTE IXBotFT getters
-    virtual bool get_ft(int ft_id, std::vector< double >& ft, int channels = 6);
-    virtual bool get_ft_fault(int ft_id, double& fault);
-    virtual bool get_ft_rtt(int ft_id, double& rtt);
+private:    
+  
+    HALInterface::Ptr _hal;
+    std::vector<std::string> _jointNames;
+    std::vector<int> _jointId;
+    int num_joint;
+    bool done; 
+    pthread_mutex_t mutex;
+    pthread_cond_t cond;
+    pthread_mutex_t w_mutex;  
+    std::shared_ptr<XBot::HALThread> mhalThread;
     
-    // NOTE IXBotIMU getters
-    virtual bool get_imu(int imu_id, std::vector< double >& lin_acc, std::vector< double >& ang_vel, std::vector< double >& quaternion);
-    virtual bool get_imu_fault(int imu_id, double& fault);
-    virtual bool get_imu_rtt(int imu_id, double& rtt);
+    std::map<int , double> _jointValMap;
+    std::map<int , double> _jointRefMap;
+    std::map<int , double> _jointVelMap;
+    std::map<int , double> _jointVelRefMap;
+    std::map<int , double> _jointTorqMap;
+    std::map<int , double> _jointTorqRefMap;
+    std::map<int , std::vector< double >> _gainMap;
+    std::map<int , std::vector< double >> _gainRefMap;
+
+    //SHARED DATA
+    std::map<int , double> _shjointValMap;
+    std::map<int , double> _shjointRefMap;    
+    std::map<int , double> _shtorqueRefMap;      
+    std::map<int , double> _shtorqueValMap;
+    std::map<int , double> _shvelRefMap;      
+    std::map<int , double> _shvelValMap;
+    std::map<int , std::vector< double >> _shgainMap;
+    std::map<int , std::vector< double >> _shgainRefMap;
+    
+    void init();
+    int recv_from_slave();
+    int send_to_slave();  
+    int loop();
+    void set_robot_state(const double* jnt, const double* torq, const double* vel, const double* stiff = nullptr, const double* damp = nullptr);
+    void get_robot_state(double* jnt, double* torq, double* vel, double* stiff, double* damp);
+    void set_robot_jnt_ref(const double* jntref);
+    void set_robot_state(const float* jnt, const float* torq, const float* vel, const float* stiff = nullptr, const float* damp = nullptr);
+    void get_robot_state(float* jnt, float* torq, float* vel, float* stiff, float* damp);
+    void set_robot_jnt_ref(const float* jntref);
+    
+protected:
     
     //NOTE IXBotJoint getters
     virtual bool get_link_pos(int joint_id, double& link_pos) final;
@@ -173,5 +186,4 @@ protected:
     virtual bool set_aux(int joint_id, const double& aux) final;
 
 };
-
 #endif

@@ -37,72 +37,13 @@
 #include <XBotInterface/Utils.h>
 #include <XBotInterface/RtLog.hpp>
 
+
 using XBot::Logger;
 
 std::shared_ptr<Loader> XBot::XBotCore::loaderptr;
 
 XBot::XBotCore::XBotCore(std::string config_yaml, 
-                         XBot::SharedMemory::Ptr shmem,  
-                         Options options) : 
-    _path_to_config(config_yaml),
-    _shmem(shmem),
-    _options(options)
-{        
-   
-    YAML::Node root_cfg = YAML::LoadFile(config_yaml);
-    
-    YAML::Node x_bot_core, root;
-    
-    std::string abs_low_level_config = "";
-    
-    // check gains in XBotCore node specifing config path YAML
-    if(root_cfg["XBotCore"]) {
-        x_bot_core = root_cfg["XBotCore"];
-            
-        if(x_bot_core["config_path"]) {
-            
-            abs_low_level_config = XBot::Utils::computeAbsolutePath(x_bot_core["config_path"].as<std::string>());
-            
-            Logger::info() << "Path to low level config is " << x_bot_core["config_path"].as<std::string>() << Logger::endl();
-            
-            Logger::info() << "Abs path to low level config is " << abs_low_level_config << Logger::endl();
-            
-            root = YAML::LoadFile(abs_low_level_config);
-        }
-    }
-
-    
-    const YAML::Node &hal_lib = root["HALInterface"];
-    
-    lib_file = "";
-    std::string lib_name="";
-    if( hal_lib == nullptr){
-      
-      Logger::error() <<"HALInterface parameter missing in config file " << Logger::endl();
-      exit(1);
-      
-    }else{
-      
-      lib_file = hal_lib["lib_file"].as<std::string>();
-      lib_name = hal_lib["lib_name"].as<std::string>();
-    }
-    
-    if(options.xbotcore_dummy_mode){
-      
-            lib_file = "libXBotDummy";
-            lib_name = "DUMMY";
-            
-            // NOTE dummy needs high level config
-            abs_low_level_config = std::string(config_yaml);
-    }
-    
-    halInterface = HALInterfaceFactory::getFactory(lib_file, lib_name, abs_low_level_config.c_str());
-    
-    if(!halInterface) exit(1);
-}
-
-XBot::XBotCore::XBotCore(std::string config_yaml, 
-                         std::shared_ptr<HALInterface> halinterface, 
+                         std::shared_ptr<HALBase> halinterface, 
                          XBot::SharedMemory::Ptr shmem,
                          Options options,
                          std::shared_ptr<XBot::TimeProviderFunction<boost::function<double()>>> time_provider
@@ -110,10 +51,10 @@ XBot::XBotCore::XBotCore(std::string config_yaml,
                         ) : 
     _path_to_config(config_yaml),
     _shmem(shmem),
-    _options(options)
+    _options(options),
+    halInterface(halinterface)
 {        
     _time_provider = time_provider;
-    halInterface = halinterface;
     if(!halInterface) exit(1);
 }
 
@@ -126,22 +67,16 @@ void XBot::XBotCore::init_internal()
 {
     // create robot from config file and any map
     XBot::AnyMapPtr anymap = std::make_shared<XBot::AnyMap>();
-    std::shared_ptr<HALInterface> hal(halInterface);
-    std::shared_ptr<XBot::IXBotJoint> xbot_joint(halInterface);
-    std::shared_ptr<XBot::IXBotFT> xbot_ft(halInterface);
-    std::shared_ptr<XBot::IXBotIMU> xbot_imu(halInterface);
-    std::shared_ptr<XBot::IXBotHand> xbot_hand(halInterface);
-    
+ 
     // TODO initilize it somewhere else
     bool xbot_enable_transmission = true;
     
+
     auto cfg = ConfigOptions::FromConfigFile(_path_to_config);
-    cfg.set_parameter("XBotJoint", xbot_joint);
-    cfg.set_parameter("XBotFT", xbot_ft);
-    cfg.set_parameter("XBotIMU", xbot_imu);
-    cfg.set_parameter("XBotHand", xbot_hand);
+    cfg.set_parameter("HAL", halInterface);
     cfg.set_parameter("EnableTransmissionPlugins", xbot_enable_transmission);
     cfg.set_parameter<std::string>("framework", "XBotRT");
+
     
     //TODO use isRT from RobotControlInterface robotInterface.IsRt()
     _robot = XBot::RobotInterface::getRobot(cfg);
@@ -155,7 +90,7 @@ void XBot::XBotCore::init_internal()
     }
     
     // create plugin handler
-    _pluginHandler = std::make_shared<XBot::PluginHandler>(_robot, _time_provider, _shmem, _options, hal);
+    _pluginHandler = std::make_shared<XBot::PluginHandler>(_robot, _time_provider, _shmem, _options, halInterface);
 
     _pluginHandler->load_plugins();
     
@@ -170,7 +105,7 @@ void XBot::XBotCore::init_internal()
 
 void XBot::XBotCore::control_init(void) 
 {
-     halInterface->init();
+     halInterface->base_init();
      init_internal();    
      
      return;
@@ -183,10 +118,10 @@ double XBot::XBotCore::get_time()
 
 int XBot::XBotCore::control_loop(void) 
 {       
-    int state = halInterface->recv_from_slave();
+    int state = halInterface->base_recv();
     if(state == 0)
       loop_internal();  
-    halInterface->send_to_slave();
+    halInterface->base_send();
 }
 
 void XBot::XBotCore::loop_internal()
