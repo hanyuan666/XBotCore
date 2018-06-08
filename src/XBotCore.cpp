@@ -71,11 +71,15 @@ void XBot::XBotCore::init_internal()
     // TODO initilize it somewhere else
     bool xbot_enable_transmission = true;
     
-    (*anymap)["HAL"] = boost::any(halInterface);
-    (*anymap)["EnableTransmissionPlugins"] = boost::any(xbot_enable_transmission);
+
+    auto cfg = ConfigOptions::FromConfigFile(_path_to_config);
+    cfg.set_parameter("HAL", halInterface);
+    cfg.set_parameter("EnableTransmissionPlugins", xbot_enable_transmission);
+    cfg.set_parameter<std::string>("framework", "XBotRT");
+
     
     //TODO use isRT from RobotControlInterface robotInterface.IsRt()
-    _robot = XBot::RobotInterface::getRobot(_path_to_config, "", anymap, "XBotRT");
+    _robot = XBot::RobotInterface::getRobot(cfg);
     
     // create time provider function
     boost::function<double()> time_func = boost::bind(&XBot::XBotCore::get_time, this);

@@ -212,10 +212,13 @@ int main(int argc, char *argv[]) try {
     XBot::XBotCoreThread xbc( path_to_cfg.c_str(), shared_memory, options );
     
     
+    
     xbc.create(true, 2);
+    Logger::info(Logger::Severity::HIGH, "Spawned XBOTCORE thread\n");
     
     if(options.comm_handler_thread_enabled){
         ch.create(false, 3);
+        Logger::info(Logger::Severity::HIGH, "Spawned COMMHANDLER thread\n");
     }
   
     while (main_loop) {

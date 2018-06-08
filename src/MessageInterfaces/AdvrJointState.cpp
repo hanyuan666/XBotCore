@@ -35,12 +35,12 @@ XBot::AdvrJointState::AdvrJointState():
 
 }
 
-bool XBot::AdvrJointState::init(const std::string& path_to_config_file, GenericJointStateMessage::Type type)
+bool XBot::AdvrJointState::init(const ConfigOptions& cfg, GenericJointStateMessage::Type type)
 {
 
     Logger::info() << "Initializing AdvrJointState message interface!" << Logger::endl();
 
-    std::string robot_name = XBot::ModelInterface::getModel(path_to_config_file)->getUrdf().getName();
+    std::string robot_name = XBot::ModelInterface::getModel(cfg)->getUrdf().getName();
     _topic_name = "/xbotcore/" + robot_name + "/joint_states";
     
     ros::NodeHandle nh;
@@ -71,7 +71,7 @@ bool XBot::AdvrJointState::init(const std::string& path_to_config_file, GenericJ
     if( type == GenericJointStateMessage::Type::Tx ){
 
         // Choosing a random joint order for publishing
-        auto robot = XBot::RobotInterface::getRobot(path_to_config_file, "xddp_robot");
+        auto robot = XBot::RobotInterface::getRobot(cfg, "xddp_robot");
 
         _msg.effort.clear();
         _msg.link_position.clear();

@@ -184,14 +184,18 @@ void XBot::CommunicationHandler::th_init(void*)
     std::shared_ptr<XBot::IXBotFT> xbot_ft = _xddp_handler;
     std::shared_ptr<XBot::IXBotIMU> xbot_imu = _xddp_handler;
     std::shared_ptr<XBot::IXBotHand> xbot_hand = _xddp_handler;
-
-    (*anymap)["XBotJoint"] = boost::any(xbot_joint);
-    (*anymap)["XBotFT"] = boost::any(xbot_ft);
-    (*anymap)["XBotIMU"] = boost::any(xbot_imu);
-    (*anymap)["XBotHand"] = boost::any(xbot_hand);
-    (*anymap)["EnableReferenceReading"] = boost::any(_enable_ref_read);
-
-    _robot = XBot::RobotInterface::getRobot(_path_to_config, "xddp_robot", anymap, "XBotRT");
+    
+    auto cfg = ConfigOptions::FromConfigFile(_path_to_config);
+    cfg.set_parameter("XBotJoint", xbot_joint);
+    cfg.set_parameter("XBotFT", xbot_ft);
+    cfg.set_parameter("XBotIMU", xbot_imu);
+    cfg.set_parameter("XBotHand", xbot_hand);
+    cfg.set_parameter<bool>("EnableTransmissionPlugins", false);
+    cfg.set_parameter<bool>("EnableReferenceReading", true);
+    cfg.set_parameter<std::string>("framework", "XBotRT");
+    
+    //TODO use isRT from RobotControlInterface robotInterface.IsRt()
+    _robot = XBot::RobotInterface::getRobot(cfg, "xddp_robot");
 
     _logger = XBot::MatLogger::getLogger("/tmp/CommunicationHandler_log");
 

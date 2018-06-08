@@ -32,7 +32,7 @@ namespace XBot {
 
     public:
 
-        virtual bool init(const std::string& path_to_config_file, Type type);
+        virtual bool init(const ConfigOptions& cfg, Type type);
 
         virtual int getIndex(const std::string& joint_name);
 

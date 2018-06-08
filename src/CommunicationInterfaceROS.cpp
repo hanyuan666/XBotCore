@@ -174,8 +174,13 @@ void CommunicationInterfaceROS::load_robot_state_publisher()
     _robot_state_pub = std::make_shared<robot_state_publisher_advr::RobotStatePublisher>(kdl_tree);
 
     _urdf_param_name = "/xbotcore/" + _robot->getUrdf().getName() + "/robot_description";
+    std::string srdf_param_name = "/xbotcore/" + _robot->getUrdf().getName() + "/robot_description_semantic";
+    std::string jidmap_param_name = "/xbotcore/" + _robot->getUrdf().getName() + "/robot_description_joint_id_map";
     _tf_prefix = "/xbotcore/" + _robot->getUrdf().getName();
+    
     _nh->setParam(_urdf_param_name, _robot->getUrdfString());
+    _nh->setParam(srdf_param_name, _robot->getSrdfString());
+    _nh->setParam(jidmap_param_name, _robot->getConfigOptions().get_joint_id_map());
 
 }
 
@@ -204,9 +209,10 @@ void CommunicationInterfaceROS::load_ros_message_interfaces() {
                        );
     
     _control_message = SoLib::getFactory<GenericControlMessage>(_control_message_path_to_so, _control_message_class_name);
-
     
-    _receive_commands_ok = _control_message->init(_path_to_cfg, GenericControlMessage::Type::Rx);
+    ConfigOptions cfg = ConfigOptions::FromConfigFile(_path_to_cfg);
+    
+    _receive_commands_ok = _control_message->init(cfg, GenericControlMessage::Type::Rx);
     
     if(_receive_commands_ok){
        Logger::success() << "Receive commands from ROS ok!" << Logger::endl();
@@ -226,7 +232,7 @@ void CommunicationInterfaceROS::load_ros_message_interfaces() {
     // Loading the requested jointstate message
     _jointstate_message = SoLib::getFactory<GenericJointStateMessage>(_jointstate_message_path_to_so, _jointstate_message_type);
     
-    _send_robot_state_ok = _jointstate_message->init(_path_to_cfg, GenericJointStateMessage::Type::Tx);
+    _send_robot_state_ok = _jointstate_message->init(cfg, GenericJointStateMessage::Type::Tx);
     
     if(_send_robot_state_ok){
         Logger::success() << "Send robot state over ROS ok!" << Logger::endl();

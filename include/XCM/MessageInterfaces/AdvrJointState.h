@@ -33,7 +33,7 @@ namespace XBot {
 
         AdvrJointState();
 
-        virtual bool init(const std::string& path_to_config_file, GenericJointStateMessage::Type type);
+        virtual bool init(const ConfigOptions& cfg, GenericJointStateMessage::Type type);
         virtual int getIndex(const std::string& joint_name);
 
         virtual double& linkPosition(int index);
