@@ -51,7 +51,8 @@ bool XBotControlPlugin::init(   XBot::Handle::Ptr handle,
     // initialize name and interfaces
     set_xbotcore_halInterface(halInterface);
     this->name = name;
-    set_xbotcore_joint(halInterface->getJoint());
+    if(halInterface)
+      set_xbotcore_joint(halInterface->getJoint());
     set_xbotcore_model(model);
 //     set_xbotcore_ft(std::shared_ptr<XBot::IXBotFT>(halInterface));
 //     set_xbotcore_imu(std::shared_ptr<XBot::IXBotIMU>(halInterface));
