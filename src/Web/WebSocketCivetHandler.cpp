@@ -30,7 +30,7 @@ bool WebSocketHandler::handleConnection(CivetServer *server, const struct mg_con
 void WebSocketHandler::handleReadyState(CivetServer *server, struct mg_connection *conn) {
    
     std::cout<<"WS ready\n";
-    const char *text = "Hello from XBotCore";
+    const char *text = "{ \"msg\": \"Hello from XBotCore\"} ";
     mg_websocket_write(conn, WEBSOCKET_OPCODE_TEXT, text, strlen(text));    
     sharedData->increaseNumClient();    
 } 
@@ -124,12 +124,13 @@ bool WebSocketHandler::handleData(CivetServer *server,
     buffer.Clear();
     if(resp){      
         rstate.serialize(buffer);
-        btosend = buffer.GetString();
-        //std::cout<<"pos"<<std::string((char*)btosend)<<std::endl;
+	btosend = buffer.GetString();
     }
-        
+    const char* str = "{ \"msg\": \"go\"}"; 
     if( btosend!=nullptr)
         mg_websocket_write(conn, WEBSOCKET_OPCODE_TEXT, btosend, buffer.GetLength());
+    else
+	mg_websocket_write(conn, WEBSOCKET_OPCODE_TEXT, str, strlen(str));
         
     return true;
 }  

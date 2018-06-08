@@ -14,6 +14,7 @@ namespace XBot {
         
         int        xbotcore_period_us = 1000;
         bool          xbotcore_dummy_mode = false;
+        bool          xbotcore_simulator_mode = false;
         bool          xbotcore_pluginhandler_catch_exceptions = true;
         bool          xbotcore_pluginhandler_print_stats = false;
         std::string   xbotcore_pluginhandler_plugin_set_name = "XBotRTPlugins";

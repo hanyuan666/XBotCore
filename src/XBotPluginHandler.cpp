@@ -42,7 +42,7 @@ PluginHandler::PluginHandler( RobotInterface::Ptr robot,
                        TimeProvider::Ptr time_provider,
                        XBot::SharedMemory::Ptr shared_memory,
                        Options options,
-                       std::shared_ptr<HALInterface> halInterface
+                       std::shared_ptr<HALBase> halInterface
                             ) :
     _robot(robot),
     _time_provider(time_provider),
@@ -259,7 +259,7 @@ void XBot::PluginHandler::init_plugin_handle_stdexcept()
 
 }
 
-bool PluginHandler::init_plugins(std::shared_ptr<HALInterface> halInterface,
+bool PluginHandler::init_plugins(std::shared_ptr<HALBase> halInterface,
                                  std::shared_ptr< IXBotModel > model)
 {
 
@@ -278,7 +278,8 @@ bool PluginHandler::init_plugins(std::shared_ptr<HALInterface> halInterface,
     if (halInterface)
       _halInterface = halInterface;
     
-    _joint = std::shared_ptr< IXBotJoint> (halInterface);    
+    if(_halInterface)
+      _joint = _halInterface->getJoint();   
     _model = model;
   
     _plugin_init_success.resize(_rtplugin_vector.size(), false);
@@ -424,14 +425,17 @@ void XBot::PluginHandler::fill_robot_state()
      
         double fault_value = 0;
         double temperature = 0;
+        double aux = 0;
         
         if(!_joint) continue;
         
         _joint->get_fault(id, fault_value);
         _joint->get_temperature(id, temperature);
+        _joint->get_aux(id,aux);
          
         _robot_state_map.at(id).RobotStateRX.fault = fault_value;
         _robot_state_map.at(id).RobotStateRX.temperature = temperature;
+        _robot_state_map.at(id).RobotStateRX.aux = aux;
         
     }
     

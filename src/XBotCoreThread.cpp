@@ -28,6 +28,8 @@
 
 #include <XBotCore/XBotCoreThread.h>
 #include <XBotCore/HALInterfaceFactory.h>
+#include <XBotInterface/SoLib.h>
+#include <XBotCore/HALThread.h>
 
 XBot::XBotCoreThread::XBotCoreThread(std::string config_yaml, 
                    XBot::SharedMemory::Ptr shared_memory,  
@@ -75,41 +77,121 @@ XBot::XBotCoreThread::XBotCoreThread(std::string config_yaml,
     }
 
     
-    const YAML::Node &hal_lib = root["HALInterface"];
+    YAML::Node hal_lib;
     std::string lib_file = "";
     std::string lib_name="";
+    std::string  iJoint="";
     
     HALInterface::Ptr __hal;
+        
+    std::string path_to_shared_lib;
+    path_to_shared_lib = XBot::Utils::computeAbsolutePath("build/install/lib/");
     
     if(options.xbotcore_dummy_mode){ // dummy mode
     
         lib_file = "libXBotDummy";
         lib_name = "DUMMY";
+        iJoint = "libXBotDummyJoint";
+	
+        // NOTE dummy needs high level config
+        abs_low_level_config = std::string(config_yaml);        
+    }
+    else if(options.xbotcore_simulator_mode){ 
+
+        lib_file = "libXBotGazeboRos";
+        lib_name = "XBotGazeboRos";
+        iJoint = "libXBotGazeboRosJoint";
         
         // NOTE dummy needs high level config
-        abs_low_level_config = std::string(config_yaml);
-        
-        __hal = HALInterfaceFactory::getFactory(lib_file, lib_name, abs_low_level_config.c_str());
-        
-    }
+        abs_low_level_config = std::string(config_yaml);            
+    }    
     else if(hal) // hal provided by constructor
     {
         __hal = hal;
     }
     else if(!hal && hal_lib) // hal is not provided by the constructor
     {
-        lib_file = hal_lib["lib_file"].as<std::string>();
+        hal_lib = root["HALInterface"];
+	lib_file = hal_lib["lib_file"].as<std::string>();
         lib_name = hal_lib["lib_name"].as<std::string>();
-        
-        __hal = HALInterfaceFactory::getFactory(lib_file, lib_name, abs_low_level_config.c_str());
+	if (hal_lib["IJoint"]){
+	  iJoint = hal_lib["IJoint"].as<std::string>();
+	}else{
+	   XBot::Logger::warning()<<"Yaml node IJoint missing in the config. file"<<Logger::endl();
+	}
     }
     else{
         throw std::runtime_error("Unable to load HAL");
     }
+      
+    __hal = HALInterfaceFactory::getFactory(lib_file, lib_name, abs_low_level_config.c_str());
+    halInterface = std::dynamic_pointer_cast<HALBase>(__hal);
+    std::string lib;
+    if(!std::dynamic_pointer_cast<XBot::HALThread>(__hal)){
+      lib = path_to_shared_lib + iJoint+".so";
+      HALInterface::Ptr joint = SoLib::getFactoryWithArgs<HALInterface>(lib,"JOINT",__hal);
+      if (joint){
+	halInterface->setJoint(joint);
+      }else {
+	XBot::Logger::error()<<"Unable to load IJoint lib "<<iJoint<<Logger::endl();
+      }
+    }
     
-
+    if (hal_lib["IEndEffectors"]){
+      const YAML::Node& list = hal_lib["IEndEffectors"];
+      XBot::Logger::info(Logger::Severity::HIGH)<<"Loading end_effectors.."<<Logger::endl();
+      for(const auto& end_eff : list){
+	  std::string iend_eff = end_eff[1].as<std::string>();
+	  lib = path_to_shared_lib + iend_eff+".so";
+	  HALInterface::Ptr hand = SoLib::getFactoryWithArgs<HALInterface>(lib,"HAND"+iend_eff,halInterface);
+	  for(const auto& id : end_eff[0]){
+	    int idn =  id.as<int>();
+	    if( hand){
+	      XBot::Logger::info(Logger::Severity::HIGH)<<"ID: "<<id<<" lib: "<<iend_eff<<Logger::endl();
+	      halInterface->setHandId(idn,hand);
+	      if (!halInterface->isLoaded(iend_eff)) halInterface->addLib(iend_eff,hand);
+	    }else{
+	      XBot::Logger::error()<<"Unable to load end_effector ID: "<<id<<" lib: "<<iend_eff<<Logger::endl();
+	    }
+	  }
+      }  
+    }
+  
+    if (hal_lib["ISensors"]){
+      const YAML::Node& list = hal_lib["ISensors"];
+      XBot::Logger::info(Logger::Severity::HIGH)<<"Loading sensors.."<<Logger::endl();
+      for(const auto& sensor : list){
+	  std::string isensor = sensor[1].as<std::string>();
+	  lib = path_to_shared_lib + isensor+".so";
+	  HALInterface::Ptr sensorptr = SoLib::getFactoryWithArgs<HALInterface>(lib,"SENSOR"+isensor,halInterface);
+	  for(const auto& id : sensor[0]){
+	      int idn =  id.as<int>();
+	      if(sensorptr){
+		XBot::Logger::info(Logger::Severity::HIGH)<<"ID: "<<idn<<" lib: "<<isensor<<Logger::endl();
+		halInterface->setSensorId(idn,sensorptr);
+		if (!halInterface->isLoaded(isensor)) halInterface->addLib(isensor,sensorptr);
+	      }else{
+		XBot::Logger::error()<<"Unable to load sensor ID: "<<idn<<" lib: "<<isensor<<Logger::endl();
+	      }
+	  }
+      }  
+    }
+    
+    
+    if(options.xbotcore_simulator_mode){ 
+      boost::function<double()> time_func = boost::bind(boost::mem_fn(&HALBase::getTime), boost::ref(halInterface));   
+      time_provider = std::make_shared<XBot::TimeProviderFunction<boost::function<double()>>>(time_func);
+      
+      lib =  path_to_shared_lib + "libXBotGazeboRosFT.so";
+      HALInterface::Ptr sensorptrft = SoLib::getFactoryWithArgs<HALInterface>(lib,"SENSORft",halInterface);
+      if (!halInterface->isLoaded("ft")) halInterface->addLib("ft",sensorptrft);
+      lib =  path_to_shared_lib + "libXBotGazeboRosIMU.so";
+      HALInterface::Ptr sensorptrimu = SoLib::getFactoryWithArgs<HALInterface>(lib,"SENSORimu",halInterface);
+      if (!halInterface->isLoaded("imu")) halInterface->addLib("imu",sensorptrimu);
+    }      
+        
     controller = std::shared_ptr<ControllerInterface>(new XBot::XBotCore(config_yaml, 
-                                                                         __hal, 
+                                                                         halInterface, 
                                                                          shared_memory, 
                                                                          options, 
                                                                          time_provider)
@@ -163,4 +245,5 @@ void XBot::XBotCoreThread::th_loop( void * ){
 XBot::XBotCoreThread::~XBotCoreThread() {
     
    Logger::info() << "~XBotCoreThread()" << Logger::endl();
+   halInterface->clearAll();
 }

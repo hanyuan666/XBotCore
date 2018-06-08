@@ -22,6 +22,7 @@
 #define __I_X_BOT_HAND_H__
 
 #include <vector>
+#include <memory>
 
 namespace XBot
 {
@@ -37,11 +38,17 @@ class XBot::IXBotHand
 
 public:
 
-    virtual bool grasp(int hand_id, double grasp_percentage) = 0;
+    typedef std::shared_ptr<XBot::IXBotHand> Ptr;
     
-    virtual double get_grasp_state(int hand_id) = 0;
-   
-    // TBD grasp force?
+    virtual bool grasp(int hand_id, double grasp_percentage) = 0;
+    virtual bool move_finger(int hand_id, int finger_id, double percentage) { return false; };
+    
+    virtual bool get_finger_motor_position(int hand_id, int finger_id, double& motor_pos) { return false; };
+    virtual bool get_finger_current(int hand_id, int finger_id, double& current) { return false; };
+    virtual bool get_finger_analog_sensors(int hand_id, int finger_id, double& an1, double& an2, double& an3) { return false; };
+    virtual bool get_finger_position_reference(int hand_id, int finger_id, double& position_reference) { return false; };
+    
+    virtual double get_grasp_state(int hand_id) = 0; //TBD remove it
 
 
 };

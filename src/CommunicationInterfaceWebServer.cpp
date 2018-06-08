@@ -69,22 +69,31 @@ CommunicationInterfaceWebServer::CommunicationInterfaceWebServer(XBotInterface::
     }      
     
     numjoint = _robot->getJointNum();
-    buffer = std::make_shared<Buffer<WebRobotStateTX>>(50);    
+    buffer = std::make_shared<Buffer<WebRobotStateTX>>(50);  
     sharedData = std::make_shared<SharedData>();
     try{
       server = std::make_shared<CivetServer>(cpp_options);  
     }catch( CivetException e ){ std::cout<<"Port "<< aport <<" already in use from another process"<<std::endl; std::cout<<e.what()<<std::endl; exit(1);}
     ws_civet_handler = std::make_shared<WebSocketHandler>(buffer, sharedData);   
-    server->addWebSocketHandler("/websocket", *ws_civet_handler);  
+    server->addWebSocketHandler("/websocket", *ws_civet_handler);
+    sharedData->model = _robot->getUrdf();
+    
+    for (auto &t :  _robot->getForceTorque()){
+	std::string s =t.first;
+	XBot::ForceTorqueSensor::ConstPtr sensor =  t.second;
+	int id = sensor->getSensorId();
+	sharedData->ft_sensors[s]= id;
+    }
+
+    
     for ( auto &chainmap : _robot->getChainMap()){
         std::string key =chainmap.first;
         XBot::KinematicChain::Ptr chain = chainmap.second;
         std::vector<std::string> ids;
         //populate ids
         for( int i=0; i<chain->getJointIds().size();i ++){
-          ids.push_back(std::to_string(chain->getJointIds()[i]));
+          ids.push_back(std::to_string(chain->getJointIds()[i])); 
         }
-        
         std::vector<std::string> names = chain->getJointNames();
         std::vector<std::string> jvals, vval, eval, pref, vref, eref, stiff, damp;
         //populate jvals
@@ -150,6 +159,22 @@ void CommunicationInterfaceWebServer::sendRobotState()
     _robot->getVelocityReference(vel_ref_id_map);
     _robot->getEffortReference(eff_ref_id_map);
     
+    WebFTSensor ftsensor;
+    
+    for (auto &t :  _robot->getForceTorque()){
+	std::string s =t.first;
+	XBot::ForceTorqueSensor::ConstPtr sensor =  t.second;
+	Eigen::Vector3d force;
+	sensor->getForce(force);
+	Eigen::Vector3d torque;
+	sensor->getTorque(torque);
+	int id = sensor->getSensorId();
+	ftsensor.ft_id.push_back(id);
+	ftsensor.ft_name.push_back(s);
+	ftsensor.force.push_back(WebFTSensor::Vector3(force[0],force[1], force[2]));
+	ftsensor.torque.push_back(WebFTSensor::Vector3(torque[0],torque[1], torque[2]));
+    }
+    
     WebRobotStateTX rstate;  
     
     for ( auto s: _robot->getEnabledJointNames()) {      
@@ -192,6 +217,8 @@ void CommunicationInterfaceWebServer::sendRobotState()
         rstate.vel_ref.push_back(vel_ref);
         rstate.effort_ref.push_back(eff_ref);
     }
+    
+    rstate.ftsensor = ftsensor;
     
     if(sharedData->getNumClient().load() <= 0) {
         buffer->clear();
@@ -284,6 +311,7 @@ bool CommunicationInterfaceWebServer::advertiseSwitch(const std::string& port_na
     server->addHandler(PLUGIN_URI, *http_civet_handler);
     server->addHandler(STATE_URI, *http_civet_handler);
     server->addHandler(CHAINS_URI, *http_civet_handler);
+    server->addHandler(MODEL_URI, *http_civet_handler);
     sharedData->insertSwitch(port_name, "");
     
     return true;

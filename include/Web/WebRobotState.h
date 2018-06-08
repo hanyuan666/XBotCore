@@ -27,6 +27,34 @@
 
 using namespace rapidjson;
 
+class WebFTSensor {
+  
+  public:
+    
+    struct Vector3{
+      
+      Vector3(double x, double y, double z){
+	
+	this->x = x;
+	this->y = y;
+	this->z = z;
+	
+      }
+      
+      double x;
+      double y;
+      double z;
+    };
+    
+    std::vector<std::string> ft_name;
+    std::vector<int> ft_id;
+    std::vector<Vector3> force;
+    std::vector<Vector3> torque;
+     
+    void serializeArray(Writer<StringBuffer>& writer, std::string key, std::vector<Vector3>& array);
+  
+};
+
 class WebRobotStateTX {
   
   public:
@@ -48,6 +76,7 @@ class WebRobotStateTX {
     std::vector<double> vel_ref;
     std::vector<double> effort_ref;
     
+    WebFTSensor ftsensor;
     
     //XBot::RobotState::pdo_rx pdo_rx;
     //hand
@@ -56,7 +85,7 @@ class WebRobotStateTX {
   
     void serialize(StringBuffer& buffer);
     
-  private:
+  public:
     
     //template <typename T>
     void serializeArray(Writer<StringBuffer>& writer, std::string key, std::vector<double>& array);

@@ -100,6 +100,8 @@ public:
     
     virtual bool set_aux(int joint_id, const double& aux) = 0;
     
+    virtual bool setControlMode(const std::string& ctr_mode, int id){ return false;};
+    
     
     virtual ~IXBotJoint() {
         if(Logger::GetVerbosityLevel() == Logger::Severity::LOW)

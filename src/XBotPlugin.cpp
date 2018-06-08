@@ -42,7 +42,7 @@ HALInterface::HALType XBotPlugin::get_hal_type(){
     return _halInterface->_hal_type;
 }
     
-std::shared_ptr< HALInterface > XBotPlugin::get_xbotcore_halInterface()
+std::shared_ptr< HALBase > XBotPlugin::get_xbotcore_halInterface()
 {
     return _halInterface;
 }
@@ -72,7 +72,7 @@ std::shared_ptr< XBot::IXBotHand > XBot::XBotPlugin::get_xbotcore_hand()
     return _hand;
 }
 
-void XBotPlugin::set_xbotcore_halInterface(std::shared_ptr< HALInterface > halInterface)
+void XBotPlugin::set_xbotcore_halInterface(std::shared_ptr< HALBase > halInterface)
 {
     _halInterface = halInterface;
 }

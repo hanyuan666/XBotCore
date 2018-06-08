@@ -37,7 +37,7 @@
 #include <XBotCore-interfaces/XBotESC.h>
 #include <XBotCore-interfaces/XBotHandle.h>
 #include <XCM/XBotPluginStatus.h>
-#include <XBotCore/HALInterface.h>
+#include <XBotCore/HALBase.h>
 
 #include <map>
 #include <vector>
@@ -65,7 +65,7 @@ public:
     virtual bool init(XBot::Handle::Ptr handle,
                       std::string name,
                       std::shared_ptr<PluginStatus> cstatus,
-                      std::shared_ptr<HALInterface> halInterface,
+                      std::shared_ptr<HALBase> halInterface,
                       std::shared_ptr<XBot::IXBotModel> model ) = 0;
                       
     virtual void run(double time, double period) = 0;
@@ -77,7 +77,7 @@ public:
     
 protected:
     
-    std::shared_ptr<HALInterface> get_xbotcore_halInterface();
+    std::shared_ptr<HALBase> get_xbotcore_halInterface();
     std::shared_ptr<XBot::IXBotJoint> get_xbotcore_joint();
     std::shared_ptr<XBot::IXBotModel> get_xbotcore_model();
     std::shared_ptr<XBot::IXBotFT>    get_xbotcore_ft();
@@ -86,7 +86,7 @@ protected:
     std::string get_hal_name();
     HALInterface::HALType get_hal_type();
     
-    void set_xbotcore_halInterface(std::shared_ptr<HALInterface> halInterface);
+    void set_xbotcore_halInterface(std::shared_ptr<HALBase> halInterface);
     void set_xbotcore_joint(std::shared_ptr<XBot::IXBotJoint> joint);
     void set_xbotcore_model(std::shared_ptr<XBot::IXBotModel> model);
     void set_xbotcore_ft(std::shared_ptr<XBot::IXBotFT> ft);
@@ -101,7 +101,7 @@ private:
     std::shared_ptr<XBot::IXBotFT>    _ft;
     std::shared_ptr<XBot::IXBotIMU>   _imu;
     std::shared_ptr<XBot::IXBotHand>   _hand;
-    std::shared_ptr<HALInterface> _halInterface;
+    std::shared_ptr<HALBase> _halInterface;
 
 };
 

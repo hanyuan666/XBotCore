@@ -114,6 +114,50 @@ struct ImuEscPdoTypes {
      
 };
 
+struct HeriHandEscPdoTypes {
+                    
+    // TX  slave_input -- master output
+    struct pdo_tx {
+        float       pos_ref;    // rad   
+        float       pos_ref_2;  // rad   
+        int16_t     vel_ref;    // mrad/s 
+        int16_t     tor_ref;    // mNm
+        uint16_t    gain_0;      
+        uint16_t    gain_1;     
+        uint16_t    gain_2;     
+        uint16_t    gain_3;     
+        uint16_t    gain_4;     
+        uint16_t    fault_ack;
+        uint16_t    ts;
+        uint16_t    op_idx_aux;  // op [get/set] , idx
+        float       rx_aux;         // set value
+        
+    }  __attribute__ ( ( __packed__ ) ); // 32 bytes
+
+    // RX  slave_output -- master input
+    struct pdo_rx {
+        float        motor_pos;     // rad
+        float        motor_pos_2;   // rad
+        int16_t      motor_vel;     // mrad/s
+        int16_t      motor_vel_2;   // mrad/s
+        uint16_t     m1_an_1;       // motor 1 analog 1
+        uint16_t     m1_an_2;       // motor 1 analog 2
+        uint16_t     m1_an_3;       // motor 1 analog 3
+        uint16_t     m2_an_1;       // motor 2 analog 1
+        uint16_t     m2_an_2;       // motor 2 analog 2
+        uint16_t     m2_an_3;       // motor 2 analog 3
+        int16_t      m1_curr;       // mA ?
+        int16_t      m2_curr;       // mA ?
+        uint16_t     fault;
+        uint16_t     rtt;           // us
+        uint16_t     op_idx_ack;    // op [ack/nack] , idx
+        float        tx_aux;        // get value or nack erro code
+        
+    }  __attribute__ ( ( __packed__ ) ); // 38 bytes
+
+}; // ... 70 bytes
+
+
 
 
 struct sdo_info {
@@ -210,6 +254,48 @@ struct RobotIMU {
         double       rtt;                // us
         
     } IMURX __attribute__ ( ( __packed__ ) );
+
+};
+
+struct RobotHERIHand {
+    
+    // TX  slave_input -- master output
+    struct pdo_tx {
+        double    pos_ref;    // rad   
+        double    pos_ref_2;  // rad   
+        double    vel_ref;    // mrad/s 
+        double    tor_ref;    // mNm
+        double    gain_0;      
+        double    gain_1;     
+        double    gain_2;     
+        double    gain_3;     
+        double    gain_4;     
+        double    fault_ack;
+        double    ts;
+        double    op_idx_aux;  // op [get/set] , idx
+        double    rx_aux;         // set value
+    } HERIHandTX __attribute__ ( ( __packed__ ) );
+
+    // RX  slave_output -- master input
+    struct pdo_rx {
+        double     motor_pos;     // rad
+        double     motor_pos_2;   // rad
+        double     motor_vel;     // mrad/s
+        double     motor_vel_2;   // mrad/s
+        double     m1_an_1;       // motor 1 analog 1
+        double     m1_an_2;       // motor 1 analog 2
+        double     m1_an_3;       // motor 1 analog 3
+        double     m2_an_1;       // motor 2 analog 1
+        double     m2_an_2;       // motor 2 analog 2
+        double     m2_an_3;       // motor 2 analog 3
+        double     m1_curr;       // mA ?
+        double     m2_curr;       // mA ?
+        double     fault;
+        double     rtt;           // us
+        double     op_idx_ack;    // op [ack/nack] , idx
+        double     tx_aux;        // get value or nack erro code
+        
+    } HERIHandRX __attribute__ ( ( __packed__ ) );
 
 };
 

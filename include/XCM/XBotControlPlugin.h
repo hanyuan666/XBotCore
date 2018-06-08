@@ -64,7 +64,7 @@ public:
     virtual bool init(XBot::Handle::Ptr handle,
                       std::string name,
                       std::shared_ptr< PluginStatus > cstatus,                      
-                      std::shared_ptr<HALInterface> halInterface,
+                      std::shared_ptr<HALBase> halInterface,
                       std::shared_ptr< XBot::IXBotModel > model) final;
 
     virtual bool init_control_plugin(XBot::Handle::Ptr handle) = 0;
