@@ -129,7 +129,7 @@ XBot::XBotCoreThread::XBotCoreThread(std::string config_yaml,
     std::string lib;
     if(!std::dynamic_pointer_cast<XBot::HALThread>(__hal)){
       lib = path_to_shared_lib + iJoint+".so";
-      HALInterface::Ptr joint = SoLib::getFactoryWithArgs<HALInterface>(lib,"JOINT",__hal);
+      HALInterface::Ptr joint = SoLib::getFactoryWithArgs<HALInterface>(lib, "JOINT",__hal);
       if (joint){
 	halInterface->setJoint(joint);
       }else {
