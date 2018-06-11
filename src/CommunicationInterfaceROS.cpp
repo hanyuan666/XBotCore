@@ -187,30 +187,19 @@ void CommunicationInterfaceROS::load_robot_state_publisher()
 
 void CommunicationInterfaceROS::load_ros_message_interfaces() {
 
-    // core YAML
-    std::string core_absolute_path;
-    computeAbsolutePath("core.yaml", // NOTE we fixed it.
-                        "/",
-                        core_absolute_path);
-    YAML::Node core_cfg = YAML::LoadFile(core_absolute_path);
-    
-    // TBD check if they exist
-    const YAML::Node &ros_interface_root = core_cfg["RobotInterfaceROS"];
-    _control_message_type = ros_interface_root["control_message_type"].as<std::string>();
-    _jointstate_message_type = ros_interface_root["jointstate_message_type"].as<std::string>();
-
-    const YAML::Node &ctrl_msg_root = core_cfg[_control_message_type];
-    _control_message_class_name = ctrl_msg_root["subclass_name"].as<std::string>();
-    _control_message_path_to_so = ctrl_msg_root["path_to_shared_lib"].as<std::string>();
-
-    computeAbsolutePath(_control_message_path_to_so,
-                        LIB_MIDDLE_PATH,
-                        _control_message_path_to_so
-                       );
-    
-    _control_message = SoLib::getFactory<GenericControlMessage>(_control_message_path_to_so, _control_message_class_name);
-    
+    // get config file    
     ConfigOptions cfg = ConfigOptions::FromConfigFile(_path_to_cfg);
+    
+    // Get control message type && joint state message type
+    _control_message_type = _control_message_class_name = "AdvrCommandMessage";
+    _jointstate_message_type = _jointstate_message_class_name = "AdvrJointStateMessage";
+    
+    cfg.get_parameter("control_message_type", _control_message_type);
+    cfg.get_parameter("jointstate_message_type", _jointstate_message_type);
+    
+    // Loading the requested control message
+    _control_message_path_to_so = XBot::Utils::FindLib("lib" + _control_message_type + ".so", "LD_LIBRARY_PATH");
+    _control_message = SoLib::getFactory<GenericControlMessage>(_control_message_path_to_so, _control_message_class_name);
     
     _receive_commands_ok = _control_message->init(cfg, GenericControlMessage::Type::Rx);
     
@@ -220,19 +209,13 @@ void CommunicationInterfaceROS::load_ros_message_interfaces() {
     }
     
 
-    const YAML::Node &jointstate_msg_root = core_cfg[_jointstate_message_type];
-    _jointstate_message_class_name = jointstate_msg_root["subclass_name"].as<std::string>();
-    _jointstate_message_path_to_so = jointstate_msg_root["path_to_shared_lib"].as<std::string>();
-
-    computeAbsolutePath(_jointstate_message_path_to_so,
-                        LIB_MIDDLE_PATH,
-                        _jointstate_message_path_to_so
-                       );
-
     // Loading the requested jointstate message
-    _jointstate_message = SoLib::getFactory<GenericJointStateMessage>(_jointstate_message_path_to_so, _jointstate_message_type);
+    _jointstate_message_path_to_so = XBot::Utils::FindLib("lib" + _jointstate_message_type + ".so", "LD_LIBRARY_PATH");
+    _jointstate_message = SoLib::getFactory<GenericJointStateMessage>(_jointstate_message_path_to_so,
+                                                                      _jointstate_message_type);
     
     _send_robot_state_ok = _jointstate_message->init(cfg, GenericJointStateMessage::Type::Tx);
+    
     
     if(_send_robot_state_ok){
         Logger::success() << "Send robot state over ROS ok!" << Logger::endl();
@@ -248,9 +231,10 @@ void CommunicationInterfaceROS::load_ros_message_interfaces() {
         _jointid_to_command_msg_idx[id] = _control_message->getIndex(joint_name);;
     }
     
-    /* check if I have to send /tf */
-    if(ros_interface_root["publish_tf"]) {
-        _publish_tf = ros_interface_root["publish_tf"].as<bool>();
+    /* check if I have to send /tf -> true by default */
+    cfg.get_parameter("publish_tf", _publish_tf); 
+    if(_publish_tf) {
+        Logger::info() << "Publishing /tf" << Logger::endl();
     }
 
 }
