@@ -52,10 +52,10 @@ void _MODULE_PREFIX_::on_start(double time)
      * Since this function is called within the real-time loop, you should not perform
      * operations that are not rt-safe. */
 
-    /* Save the plugin starting time to a class member */
+    /* Save the robot starting config to a class member */
     _robot->getMotorPosition(_q0);
 
-    /* Save the robot starting config to a class member */
+    /* Save the plugin starting time to a class member */
     _start_time = time;
 }
 
