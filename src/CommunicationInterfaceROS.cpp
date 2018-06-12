@@ -34,9 +34,9 @@
 
 
 
-extern "C" XBot::CommunicationInterfaceROS* create_instance(XBot::RobotInterface::Ptr robot, XBot::XBotXDDP::Ptr xddp_handler )
+extern "C" XBot::CommunicationInterfaceROS* create_instance(XBot::RobotInterface::Ptr robot, XBot::XBotIPC::Ptr ipc_handler )
 {
-  return new XBot::CommunicationInterfaceROS(robot, xddp_handler);
+  return new XBot::CommunicationInterfaceROS(robot, ipc_handler);
 }
 
 extern "C" void destroy_instance( XBot::CommunicationInterfaceROS* instance )
@@ -118,10 +118,10 @@ CommunicationInterfaceROS::CommunicationInterfaceROS():
 }
 
 CommunicationInterfaceROS::CommunicationInterfaceROS(XBotInterface::Ptr robot, 
-                                                     XBot::XBotXDDP::Ptr xddp_handler, 
+                                                     XBot::XBotIPC::Ptr ipc_handler, 
                                                      XBot::IXBotJoint::Ptr xbot_joint
                                                     ):
-    CommunicationInterface(robot, xddp_handler, xbot_joint),
+    CommunicationInterface(robot, ipc_handler, xbot_joint),
     _path_to_cfg(robot->getPathToConfig())
 {
     int argc = 1;
@@ -259,7 +259,7 @@ void CommunicationInterfaceROS::sendRobotState()
     for( int id : _robot->getEnabledJointId() ){
         int joint_state_msg_idx = _jointid_to_jointstate_msg_idx.at(id);
         double fault_value;
-        _xddp_handler->get_fault(id, fault_value);
+        _ipc_handler->get_fault(id, fault_value);
         _jointstate_message->fault(joint_state_msg_idx) = fault_value;
     }
 

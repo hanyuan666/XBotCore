@@ -220,7 +220,9 @@ add_library(XCM SHARED ${XBotInterface_INCLUDES}
 #                         src/XBotModuleHandler.cpp
                         src/XBotControlModule.cpp
                         src/XBotCommunicationHandler.cpp
+                        src/XBotIPC.cpp
                         src/XBotXDDP.cpp
+                        src/XBotIDDP.cpp
                         src/XBotESCUtils.cpp
                         src/IOPlugin.cpp
                         src/XBotPluginStatus.cpp    
@@ -240,7 +242,9 @@ add_library(XCM_no_xeno SHARED ${XBotInterface_INCLUDES}
 #                         src/XBotModuleHandler.cpp
                         src/XBotControlModule.cpp
                         src/XBotCommunicationHandler.cpp
+                        src/XBotIPC.cpp
                         src/XBotXDDP.cpp
+                        src/XBotIDDP.cpp
                         src/XBotESCUtils.cpp
                         src/IOPlugin.cpp
                         src/XBotPluginStatus.cpp 

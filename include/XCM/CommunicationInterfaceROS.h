@@ -41,7 +41,7 @@ public:
 
     CommunicationInterfaceROS();
     CommunicationInterfaceROS(XBotInterface::Ptr robot, 
-                              XBot::XBotXDDP::Ptr xddp_handler,
+                              XBot::XBotIPC::Ptr ipc_handler,
                               XBot::IXBotJoint::Ptr xbot_joint = nullptr
                              );
 
