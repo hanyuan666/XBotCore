@@ -23,6 +23,8 @@
 
 #include <XCM/XBotIPC.h>
 
+#include <XBotInterface/ModelInterface.h>
+
 namespace XBot
 {
     class XBotIDDP;
@@ -49,6 +51,8 @@ public:
     virtual void updateTX();
 
 private:
+    
+    XBot::ModelInterface::Ptr _xbotinterface;
 
     /**
      * @brief fd reading from pipes: we read the robot from XBotCore IDDP pipe

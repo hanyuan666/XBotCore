@@ -23,22 +23,22 @@
 
 XBot::XBotIDDP::XBotIDDP(std::string config_file) : XBot::XBotIPC(config_file)
 {
-   
+    _xbotinterface = XBot::ModelInterface::getModel(config_file);
 }
 
 bool XBot::XBotIDDP::init()
 {
-    // motors
-    for(auto& c : robot) {
-        for(int i=0; i< c.second.size(); i++) {
+    
+    for( int id : _xbotinterface->getEnabledJointId() ) {
+        if( id > 0 ) {
+            XBot::SubscriberIDDP<XBot::RobotState> subscriber_rx(std::string("iddp_Motor_id_") + std::to_string(id));
+            fd_read[id] = subscriber_rx;
 
-            XBot::SubscriberIDDP<XBot::RobotState> subscriber_rx(std::string("iddp_Motor_id_") + std::to_string(c.second[i]).c_str());
-            fd_read[c.second[i]] = subscriber_rx;
-
-            XBot::PublisherIDDP<XBot::RobotState::pdo_tx> publisher_tx(std::string("iddp_in_Motor_id_") + std::to_string(c.second[i]).c_str());
-            fd_write[c.second[i]] = publisher_tx;
+            XBot::PublisherIDDP<XBot::RobotState::pdo_tx> publisher_tx(std::string("iddp_in_Motor_id_") + std::to_string(id));
+            fd_write[id] = publisher_tx;
         }
     }
+    
 
     // hand
     for(auto& hand_j : hand) {
