@@ -24,9 +24,9 @@
 #include <unistd.h>
 #include <cstring>
 
-extern "C" XBot::CommunicationInterfaceWebServer* create_instance(XBot::RobotInterface::Ptr robot, XBot::XBotXDDP::Ptr xddp_handler)
+extern "C" XBot::CommunicationInterfaceWebServer* create_instance(XBot::RobotInterface::Ptr robot, XBot::XBotIPC::Ptr ipc_handler)
 {
-  return new XBot::CommunicationInterfaceWebServer(robot, xddp_handler);
+  return new XBot::CommunicationInterfaceWebServer(robot, ipc_handler);
 }
 
 extern "C" void destroy_instance( XBot::CommunicationInterfaceWebServer* instance )
@@ -42,8 +42,8 @@ CommunicationInterfaceWebServer::CommunicationInterfaceWebServer():
     
 }
 
-CommunicationInterfaceWebServer::CommunicationInterfaceWebServer(XBotInterface::Ptr robot, XBot::XBotXDDP::Ptr xddp_handler):
-    CommunicationInterface(robot,xddp_handler),
+CommunicationInterfaceWebServer::CommunicationInterfaceWebServer(XBotInterface::Ptr robot, XBot::XBotIPC::Ptr ipc_handler):
+    CommunicationInterface(robot,ipc_handler),
     _path_to_cfg(robot->getPathToConfig())
 {
     std::string aport = PORT;
@@ -196,10 +196,10 @@ void CommunicationInterfaceWebServer::sendRobotState()
         double eff_ref = eff_ref_id_map.at(id);
         
         double fault_value;
-        _xddp_handler->get_fault(id, fault_value);
+        _ipc_handler->get_fault(id, fault_value);
         
         double aux_value;
-        _xddp_handler->get_aux(id, aux_value);
+        _ipc_handler->get_aux(id, aux_value);
         
         rstate.joint_id.push_back(id);
         rstate.link_position.push_back(jval);

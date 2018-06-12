@@ -28,7 +28,7 @@ std::map<std::string, void*> CommunicationInterfaceFactory::handles;
 std::shared_ptr<XBot::CommunicationInterface> CommunicationInterfaceFactory::getFactory(const std::string& file_name,
                                                                                         const std::string& lib_name,
                                                                                         XBot::RobotInterface::Ptr _robot,
-                                                                                        XBot::XBotXDDP::Ptr xddp_handler
+                                                                                        XBot::XBotIPC::Ptr ipc_handler
                                                                                        )
 {
 
@@ -46,14 +46,14 @@ std::shared_ptr<XBot::CommunicationInterface> CommunicationInterfaceFactory::get
         Logger::success(Logger::Severity::MID) << lib_name <<" INTERFACE found! " << Logger::endl();
         handles[file_name] = lib_handle;
       
-        XBot::CommunicationInterface* (*create)(XBot::RobotInterface::Ptr, XBot::XBotXDDP::Ptr);
-        create = (XBot::CommunicationInterface* (*)(XBot::RobotInterface::Ptr,XBot::XBotXDDP::Ptr))dlsym(lib_handle, "create_instance");
+        XBot::CommunicationInterface* (*create)(XBot::RobotInterface::Ptr, XBot::XBotIPC::Ptr);
+        create = (XBot::CommunicationInterface* (*)(XBot::RobotInterface::Ptr,XBot::XBotIPC::Ptr))dlsym(lib_handle, "create_instance");
         if ((error = dlerror()) != NULL) {
             fprintf(stderr, "%s\n", error);
             exit(1);
         }
         
-        XBot::CommunicationInterface* instance =(XBot::CommunicationInterface*)create(_robot, xddp_handler );
+        XBot::CommunicationInterface* instance =(XBot::CommunicationInterface*)create(_robot, ipc_handler );
         if( instance != nullptr){
           return std::shared_ptr<XBot::CommunicationInterface>(instance);
         }

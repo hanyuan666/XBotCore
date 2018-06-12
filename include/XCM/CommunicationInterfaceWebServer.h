@@ -50,7 +50,7 @@ class CommunicationInterfaceWebServer : public CommunicationInterface {
               std::cout<<"~CommunicationInterfaceWebServer"<<std::endl;
           }
         };
-      CommunicationInterfaceWebServer(XBotInterface::Ptr robot, XBot::XBotXDDP::Ptr xddp_handler);
+      CommunicationInterfaceWebServer(XBotInterface::Ptr robot, XBot::XBotIPC::Ptr ipc_handler);
 
       virtual void sendRobotState();
       virtual void receiveReference();

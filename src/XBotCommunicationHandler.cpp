@@ -180,8 +180,7 @@ void XBot::CommunicationHandler::th_init(void*)
 
     _ipc_handler = std::make_shared<XBot::XBotXDDP>(_path_to_config);
     _ipc_handler->init();
-
-    XBot::AnyMapPtr anymap = std::make_shared<XBot::AnyMap>();
+    
     std::shared_ptr<XBot::IXBotJoint> xbot_joint = _ipc_handler;
     std::shared_ptr<XBot::IXBotFT> xbot_ft = _ipc_handler;
     std::shared_ptr<XBot::IXBotIMU> xbot_imu = _ipc_handler;
@@ -230,7 +229,7 @@ void XBot::CommunicationHandler::th_init(void*)
     
     /********************************WEB INTERFACE********************************************/
     if (loadWebServer) {
-      _web_communication = CommunicationInterfaceFactory::getFactory("libwebserver", "WEB_SERVER",_robot);
+      _web_communication = CommunicationInterfaceFactory::getFactory("libwebserver", "WEB_SERVER",_robot, _ipc_handler);
       if(_web_communication){
         _communication_ifc_vector.push_back( _web_communication );
       }
