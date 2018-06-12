@@ -28,7 +28,7 @@
 #include <XBotCore-interfaces/IXBotHand.h>
 #include <XBotCore-interfaces/XDomainCommunication.h>
 
-#include <XBotCoreModel.h>
+#include <XBotCoreModel/XBotCoreModel.h>
 
 #include <cstring>
 
