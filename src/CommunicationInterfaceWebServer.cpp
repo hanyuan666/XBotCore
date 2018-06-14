@@ -76,6 +76,7 @@ CommunicationInterfaceWebServer::CommunicationInterfaceWebServer(XBotInterface::
     }catch( CivetException e ){ std::cout<<"Port "<< aport <<" already in use from another process"<<std::endl; std::cout<<e.what()<<std::endl; exit(1);}
     ws_civet_handler = std::make_shared<WebSocketHandler>(buffer, sharedData);   
     server->addWebSocketHandler("/websocket", *ws_civet_handler);
+    XBot::Logger::info() << _robot->getUrdfPath() << XBot::Logger::endl();
     sharedData->model = _robot->getUrdf();
     
     for (auto &t :  _robot->getForceTorque()){
