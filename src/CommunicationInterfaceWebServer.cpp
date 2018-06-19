@@ -69,7 +69,7 @@ CommunicationInterfaceWebServer::CommunicationInterfaceWebServer(XBotInterface::
     }      
     
     numjoint = _robot->getJointNum();
-    buffer = std::make_shared<Buffer<WebRobotStateTX>>(50);  
+    buffer = std::make_shared<Buffer<WebRobotStateTX>>(1);  
     sharedData = std::make_shared<SharedData>();
     try{
       server = std::make_shared<CivetServer>(cpp_options);  

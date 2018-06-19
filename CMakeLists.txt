@@ -77,12 +77,18 @@ endif()
 # find first YCM in order to have ${YCM_MODULE_PATH} defined for 3rd party software like Eigen3
 find_package(YCM REQUIRED)
 find_package(XBotInterface REQUIRED)
-find_package(catkin QUIET COMPONENTS roscpp sensor_msgs std_srvs message_generation robot_state_publisher srdfdom_advr)
+find_package(catkin QUIET COMPONENTS roscpp sensor_msgs std_srvs message_generation srdfdom_advr rosconsole rostime tf tf2_ros tf2_kdl kdl_parser)
 find_package(YARP QUIET)
 find_package(kdl_parser REQUIRED)
 find_package(Boost REQUIRED COMPONENTS program_options)
 
 option(BUILD_TESTS "Compile XCM tests" FALSE)
+
+add_library(robot_state_publisher_advr_solver SHARED
+  src/robot_state_publisher_advr/robot_state_publisher.cpp 
+  src/robot_state_publisher_advr/treefksolverposfull_recursive.cpp
+)
+target_link_libraries(robot_state_publisher_advr_solver ${catkin_LIBRARIES} ${XBotInterface_LIBRARIES})
 
 
 if( ${catkin_FOUND} )
@@ -256,6 +262,7 @@ endif()
 target_link_libraries(XCM PUBLIC ${XBotInterface_LIBRARIES}
                                  ${XBotCore-interfaces_LIBRARIES}
                                  ${COMMUNICATION_INTERFACE_LIBRARIES}
+                          PRIVATE robot_state_publisher_advr_solver
                                  )
 
 
@@ -267,6 +274,7 @@ target_include_directories( XCM PUBLIC
 target_link_libraries(XCM_no_xeno PUBLIC ${XBotInterface_LIBRARIES}
                                  ${XBotCore-interfaces_LIBRARIES}
                                  ${COMMUNICATION_INTERFACE_LIBRARIES}
+                                  PRIVATE robot_state_publisher_advr_solver
                                  )
 
 
@@ -313,12 +321,12 @@ ycm_library_install(XBotCoreThread 1 0 0)
 ycm_library_install(XBotCore 1 0 0)
 
 add_executable(DummyMain src/DummyMain.cpp)
-target_link_libraries(DummyMain XCM ${Boost_LIBRARIES} ${COMMON_LIBS})
+target_link_libraries(DummyMain XCM ${Boost_LIBRARIES} ${COMMON_LIBS} robot_state_publisher_advr_solver)
 # target_link_libraries(DummyMain webserver )
 ycm_library_install(DummyMain 1 0 0)
 
 add_executable(CommunicationHandler src/XBotCommunicationMain.cpp)
-target_link_libraries(CommunicationHandler XCM ${COMMUNICATION_INTERFACE_LIBRARIES} ${COMMON_LIBS})
+target_link_libraries(CommunicationHandler XCM ${COMMUNICATION_INTERFACE_LIBRARIES} ${COMMON_LIBS} robot_state_publisher_advr_solver)
 # target_link_libraries(CommunicationHandler webserver )
 ycm_library_install(CommunicationHandler 1 0 0)
 
@@ -338,6 +346,7 @@ add_subdirectory(src/IOPlugin)
 
 
 ycm_library_install(webserver 1 0 0) 
+ycm_library_install(robot_state_publisher_advr_solver 1 0 0) 
 
 ########################################################################
 ycm_library_install(XCM 1 0 0)                                    
