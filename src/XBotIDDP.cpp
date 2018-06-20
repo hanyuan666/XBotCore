@@ -72,9 +72,9 @@ bool XBot::XBotIDDP::init()
             // initialize the pdo_motor
 //             if(fd_read.count(c.second[i])) {
                 XBot::RobotState current_robot_state;
-//                 if( !(fd_read[c.second[i]].read(current_robot_state)) ) {
-//                    // give a warning
-//                 }
+                if( !(fd_read[c.second[i]].read(current_robot_state)) ) {
+                   // give a warning
+                }
                 pdo_motor[c.second[i]] = std::make_shared<XBot::RobotState>(current_robot_state);
 //             }
         }
