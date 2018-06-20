@@ -81,7 +81,10 @@ private:
                                        const std::string& middle_path,
                                        std::string& absolute_path );
 
-    bool _send_robot_state_ok, _receive_commands_ok, _publish_tf;
+    bool _send_robot_state_ok, _receive_commands_ok;
+    
+    // by default I publish the tf
+    bool _publish_tf = true;
 
     std::string _path_to_cfg;
 

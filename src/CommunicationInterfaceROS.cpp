@@ -112,9 +112,6 @@ CommunicationInterfaceROS::CommunicationInterfaceROS():
     }
 
     _nh = std::make_shared<ros::NodeHandle>();
-    
-    // by default I publish the tf
-    _publish_tf = true;
 }
 
 CommunicationInterfaceROS::CommunicationInterfaceROS(XBotInterface::Ptr robot, 
