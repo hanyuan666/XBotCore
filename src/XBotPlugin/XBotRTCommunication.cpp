@@ -74,11 +74,22 @@ bool XBot::XBotRTCommunication::init_control_plugin( XBot::Handle::Ptr handle)
 void XBot::XBotRTCommunication::on_start(double time)
 {
     _robot->sense();
-    _esc_utils->setRobotStateFromRobotInterface(_robot_state_map);
+        
+    Eigen::VectorXd q_mot;
+    _robot->getMotorPosition(q_mot);
+    _robot->setPositionReference(q_mot);
     
+    _esc_utils->setRobotStateFromRobotInterface(_robot_state_map);
+
     for(auto &p : _robot_state_map) {
         _robot_state_tx_map[p.first] = p.second.RobotStateTX;
     }
+    
+    // send motor state to EXTERNAL RT
+    for( auto& p: _robot_state_map) {
+       _pub_read_from_hal.at(p.first).write(p.second); 
+    }
+
 }
 
 void XBot::XBotRTCommunication::on_stop(double time)
@@ -107,19 +118,19 @@ void XBot::XBotRTCommunication::control_loop(double time, double period)
     for( auto& p: _imu_state_map) {
        _pub_imu_read_from_hal.at(p.first).write(p.second); 
     }
-     
-     
 
     // SUBSCRIBE FROM EXTERNAL RT - WRITE TO HAL
     for( auto& p : _sub_write_to_hal) {
+        
         p.second.read(_robot_state_tx_map[p.first]);
-//         XBot::Logger::error() << _robot_state_tx_map[p.first].pos_ref << XBot::Logger::endl();
+        XBot::Logger::error() << _robot_state_tx_map[p.first].pos_ref << XBot::Logger::endl();  
     }
 
     _esc_utils->setReferenceFromRobotStateTX(_robot_state_tx_map);
+
     
     // move the robot
-//     _robot->move();
+    _robot->move();
     
 }
 
