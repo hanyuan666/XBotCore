@@ -34,15 +34,17 @@ std::shared_ptr<XBot::XBotControlPlugin> PluginFactory::getFactory(const std::st
 {
 
     char *error;  
-    std::string path_to_so;  
-    computeAbsolutePath(file_name, "/build/install/lib/", path_to_so);
-    path_to_so += std::string(".so");
+    
+    /* Obtain full path to shared lib */
+    std::string path_to_so = XBot::Utils::FindLib ( file_name + ".so", "LD_LIBRARY_PATH" );
+    if ( path_to_so == "" ) {
+        throw std::runtime_error ( file_name + ".so" + " path must be listed inside LD_LIBRARY_PATH" );
+    }
+    
     void* lib_handle;
     lib_handle = dlopen(path_to_so.c_str(), RTLD_NOW);
     if (!lib_handle) {
         XBot::Logger::error() << lib_name <<" RT plugin NOT found! \n" << dlerror() << XBot::Logger::endl();
-        fprintf(stderr, "%s\n", dlerror());
-        //exit(1);
     }
     else     
     {
@@ -80,31 +82,4 @@ void PluginFactory::unloadLib(const std::string& file_name)
 
   dlclose( handles[file_name] );
   Logger::info() << file_name <<" Plugin unloaded! " << Logger::endl();
-}
-
-bool PluginFactory::computeAbsolutePath (  const std::string& input_path,
-                                                        const std::string& middle_path,
-                                                        std::string& absolute_path)
-{
-    // if not an absolute path
-    if(!(input_path.at(0) == '/')) {
-        // if you are working with the Robotology Superbuild
-        const char* env_p = std::getenv("ROBOTOLOGY_ROOT");
-        // check the env, otherwise error
-        if(env_p) {
-            std::string current_path(env_p);
-            // default relative path when working with the superbuild
-            current_path += middle_path;
-            current_path += input_path;
-            absolute_path = current_path;
-            return true;
-        }
-        else {
-            std::cerr << "ERROR in " << __func__ << " : the input path  " << input_path << " is neither an absolute path nor related with the robotology superbuild. Download it!" << std::endl;
-            return false;
-        }
-    }
-    // already an absolute path
-    absolute_path = input_path;
-    return true;
 }
