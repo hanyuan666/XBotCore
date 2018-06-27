@@ -10,7 +10,7 @@ mkdir -p $1
 cd $1
 
 # Local copy of XCM skeleton
-cp -r $ROBOTOLOGY_ROOT/external/XBotCore/skeleton/fsm_control/* .
+cp -r $XBOT_ROOT/external/XBotCore/skeleton/fsm_control/* .
 
 # find and replace 
 find . -maxdepth 3 -type f -not -path '*/\.*' -exec sed -i -e "s/_MODULE_PREFIX_/$1/g" {} \;

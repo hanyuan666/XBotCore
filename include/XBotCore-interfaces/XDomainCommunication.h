@@ -143,6 +143,44 @@ private:
 };
 
 template <typename DataType>
+class SubscriberIDDP : public Subscriber<DataType> {
+
+public:
+
+    SubscriberIDDP();
+    explicit SubscriberIDDP(const std::string& socket_name);
+
+    virtual void init(const std::string& socket_name);
+
+    virtual bool read(DataType& data);
+
+private:
+
+    IDDP_pipe::Ptr _pipe;
+
+
+};
+
+template <typename DataType>
+class PublisherIDDP : public Publisher<DataType> {
+
+public:
+
+    PublisherIDDP();
+    explicit PublisherIDDP(const std::string& socket_name);
+
+    virtual void init(const std::string& socket_name);
+
+    virtual void write(const DataType& data);
+
+private:
+
+    IDDP_pipe::Ptr _pipe;
+
+
+};
+
+template <typename DataType>
 class SubscriberNRT : public Subscriber<DataType>  {
 
 public:
@@ -298,6 +336,36 @@ void PublisherRT<DataType>::write(const DataType& data)
 
 
 
+
+
+template <typename DataType>
+PublisherIDDP<DataType>::PublisherIDDP()
+{
+    _pipe = std::make_shared<XBot::IDDP_pipe>(true);
+}
+
+template <typename DataType>
+PublisherIDDP<DataType>::PublisherIDDP(const std::string& socket_name) : 
+    Publisher<DataType>(socket_name)
+{
+    _pipe = std::make_shared<XBot::IDDP_pipe>(true);
+    init(socket_name);
+}
+
+template <typename DataType>
+void PublisherIDDP<DataType>::init(const std::string& socket_name)
+{
+    _pipe->init(socket_name);
+}
+
+template <typename DataType>
+void PublisherIDDP<DataType>::write(const DataType& data)
+{
+    _pipe->iddp_write(data);
+}
+
+
+
 template <typename DataType>
 SubscriberNRT<DataType>::SubscriberNRT() : 
     _fd(-1)
@@ -381,6 +449,43 @@ bool SubscriberRT<DataType>::read(DataType& data)
 
     return success;
 }
+
+
+
+template <typename DataType>
+SubscriberIDDP<DataType>::SubscriberIDDP()
+{
+    _pipe = std::make_shared<XBot::IDDP_pipe>(false);
+}
+
+template <typename DataType>
+SubscriberIDDP<DataType>::SubscriberIDDP(const std::string& socket_name) : 
+    Subscriber<DataType>(socket_name)
+{
+    _pipe = std::make_shared<XBot::IDDP_pipe>(false);
+    init(socket_name);
+}
+
+template <typename DataType>
+void SubscriberIDDP<DataType>::init(const std::string& socket_name) 
+{
+    _pipe->init(socket_name);
+}
+
+template <typename DataType>
+bool SubscriberIDDP<DataType>::read(DataType& data)
+{
+    int bytes = 1;
+    bool success = false;
+
+    while( bytes > 0 ){
+        bytes = _pipe->iddp_read(data);
+        success = success || bytes > 0;
+    }
+
+    return success;
+}
+
 
 template <typename DataType>
 Subscriber<DataType>::Subscriber() : 

@@ -107,10 +107,6 @@ namespace XBot {
         void fill_nrt_reference();
         
         void init_nrt_reference();
-
-        static bool computeAbsolutePath ( const std::string& input_path,
-                                          const std::string& midlle_path,
-                                          std::string& absolute_path ); // TBD do it with UTILS
         
         const Options _options;
 

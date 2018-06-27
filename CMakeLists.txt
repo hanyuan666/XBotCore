@@ -220,7 +220,9 @@ add_library(XCM SHARED ${XBotInterface_INCLUDES}
 #                         src/XBotModuleHandler.cpp
                         src/XBotControlModule.cpp
                         src/XBotCommunicationHandler.cpp
+                        src/XBotIPC.cpp
                         src/XBotXDDP.cpp
+                        src/XBotIDDP.cpp
                         src/XBotESCUtils.cpp
                         src/IOPlugin.cpp
                         src/XBotPluginStatus.cpp    
@@ -240,7 +242,9 @@ add_library(XCM_no_xeno SHARED ${XBotInterface_INCLUDES}
 #                         src/XBotModuleHandler.cpp
                         src/XBotControlModule.cpp
                         src/XBotCommunicationHandler.cpp
+                        src/XBotIPC.cpp
                         src/XBotXDDP.cpp
+                        src/XBotIDDP.cpp
                         src/XBotESCUtils.cpp
                         src/IOPlugin.cpp
                         src/XBotPluginStatus.cpp 
@@ -320,11 +324,6 @@ add_subdirectory(doc)
 ycm_library_install(XBotCoreThread 1 0 0)
 ycm_library_install(XBotCore 1 0 0)
 
-add_executable(DummyMain src/DummyMain.cpp)
-target_link_libraries(DummyMain XCM ${Boost_LIBRARIES} ${COMMON_LIBS} robot_state_publisher_advr_solver)
-# target_link_libraries(DummyMain webserver )
-ycm_library_install(DummyMain 1 0 0)
-
 add_executable(CommunicationHandler src/XBotCommunicationMain.cpp)
 target_link_libraries(CommunicationHandler XCM ${COMMUNICATION_INTERFACE_LIBRARIES} ${COMMON_LIBS} robot_state_publisher_advr_solver)
 # target_link_libraries(CommunicationHandler webserver )
@@ -336,9 +335,9 @@ target_link_libraries(NRTDeployer XCM_no_xeno ${Boost_LIBRARIES} ${COMMON_LIBS})
 ycm_library_install(NRTDeployer 1 0 0)
 
 
-add_executable(RobotStateLogger src/RobotStateLogger.cpp)
-target_link_libraries(RobotStateLogger XCM ${COMMUNICATION_INTERFACE_LIBRARIES})
-ycm_library_install(RobotStateLogger 1 0 0)
+# add_executable(RobotStateLogger src/RobotStateLogger.cpp)
+# target_link_libraries(RobotStateLogger XCM ${COMMUNICATION_INTERFACE_LIBRARIES})
+# ycm_library_install(RobotStateLogger 1 0 0)
 
 add_subdirectory(src/XBotPlugin)
 
