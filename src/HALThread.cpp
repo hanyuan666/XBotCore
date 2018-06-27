@@ -88,7 +88,7 @@ bool XBot::HALThread::computeAbsolutePath (const std::string& input_path,
     // if not an absolute path
     if(!(input_path.at(0) == '/')) {
         // if you are working with the Robotology Superbuild
-        const char* env_p = std::getenv("ROBOTOLOGY_ROOT");
+        const char* env_p = std::getenv("XBOT_ROOT");
         // check the env, otherwise error
         if(env_p) {
             std::string current_path(env_p);
