@@ -382,3 +382,8 @@ INSTALL(PROGRAMS scripts/generate_XBot_Plugin.sh DESTINATION bin)
 INSTALL(PROGRAMS scripts/generate_XBot_PluginFSM.sh DESTINATION bin)
 # install script to generate XBot IO Plugin skeleton
 INSTALL(PROGRAMS scripts/generate_XBot_IOPlugin.sh DESTINATION bin)
+
+# install config file xbot utils
+INSTALL(PROGRAMS scripts/get_xbot_config DESTINATION bin)
+INSTALL(PROGRAMS scripts/set_xbot_config DESTINATION bin)
+INSTALL(PROGRAMS scripts/open_xbot_config DESTINATION bin)
