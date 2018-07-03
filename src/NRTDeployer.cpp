@@ -23,6 +23,8 @@
 
 #include <boost/bind.hpp>
 
+#include <XBotInterface/ConfigOptions.h>
+
 XBot::NRTDeployer::NRTDeployer(std::string path_to_config) :
     _path_to_config(path_to_config)
 {
@@ -51,7 +53,8 @@ void XBot::NRTDeployer::th_init(void*)
 {
 
     // XBot robot
-    _robot = RobotInterface::getRobot(_path_to_config);
+    auto cfg = XBot::ConfigOptions::FromConfigFile(_path_to_config); 
+    _robot = RobotInterface::getRobot(cfg);
     
     // create time provider function
     boost::function<double()> time_func = boost::bind(&XBot::NRTDeployer::get_time, this);

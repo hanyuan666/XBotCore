@@ -34,9 +34,9 @@
 
 
 
-extern "C" XBot::CommunicationInterfaceROS* create_instance(XBot::RobotInterface::Ptr robot, XBot::XBotXDDP::Ptr xddp_handler )
+extern "C" XBot::CommunicationInterfaceROS* create_instance(XBot::RobotInterface::Ptr robot, XBot::XBotIPC::Ptr ipc_handler )
 {
-  return new XBot::CommunicationInterfaceROS(robot, xddp_handler);
+  return new XBot::CommunicationInterfaceROS(robot, ipc_handler);
 }
 
 extern "C" void destroy_instance( XBot::CommunicationInterfaceROS* instance )
@@ -112,16 +112,13 @@ CommunicationInterfaceROS::CommunicationInterfaceROS():
     }
 
     _nh = std::make_shared<ros::NodeHandle>();
-    
-    // by default I publish the tf
-    _publish_tf = true;
 }
 
 CommunicationInterfaceROS::CommunicationInterfaceROS(XBotInterface::Ptr robot, 
-                                                     XBot::XBotXDDP::Ptr xddp_handler, 
+                                                     XBot::XBotIPC::Ptr ipc_handler, 
                                                      XBot::IXBotJoint::Ptr xbot_joint
                                                     ):
-    CommunicationInterface(robot, xddp_handler, xbot_joint),
+    CommunicationInterface(robot, ipc_handler, xbot_joint),
     _path_to_cfg(robot->getPathToConfig())
 {
     int argc = 1;
@@ -259,7 +256,7 @@ void CommunicationInterfaceROS::sendRobotState()
     for( int id : _robot->getEnabledJointId() ){
         int joint_state_msg_idx = _jointid_to_jointstate_msg_idx.at(id);
         double fault_value;
-        _xddp_handler->get_fault(id, fault_value);
+        _ipc_handler->get_fault(id, fault_value);
         _jointstate_message->fault(joint_state_msg_idx) = fault_value;
     }
 
@@ -692,35 +689,6 @@ bool XBot::CommunicationInterfaceROS::receiveMasterCommunicationInterface(std::s
     else {
         return false;
     }
-}
-
-
-
-bool CommunicationInterfaceROS::computeAbsolutePath (  const std::string& input_path,
-                                                 const std::string& middle_path,
-                                                 std::string& absolute_path)
-{
-    // if not an absolute path
-    if(!(input_path.at(0) == '/')) {
-        // if you are working with the Robotology Superbuild
-        const char* env_p = std::getenv("ROBOTOLOGY_ROOT");
-        // check the env, otherwise error
-        if(env_p) {
-            std::string current_path(env_p);
-            // default relative path when working with the superbuild
-            current_path += middle_path;
-            current_path += input_path;
-            absolute_path = current_path;
-            return true;
-        }
-        else {
-            std::cerr << "ERROR in " << __func__ << " : the input path  " << input_path << " is neither an absolute path nor related with the robotology superbuild. Download it!" << std::endl;
-            return false;
-        }
-    }
-    // already an absolute path
-    absolute_path = input_path;
-    return true;
 }
 
 

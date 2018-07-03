@@ -43,16 +43,23 @@ add_library(XBotNRTRef SHARED
     XBotNRTRef.cpp
 )
 
+# lib
+add_library(XBotRTCommunication SHARED
+    XBotRTCommunication.cpp
+)
+
 # set Xenomain flags if Xenomai is found
 if ( Xenomai_FOUND )
     set_xeno_flags(XBotCommunicationPlugin)
     set_xeno_flags(XBotNRTRef)
+    set_xeno_flags(XBotRTCommunication)
 endif()
 
 # linking
 target_link_libraries(XBotCommunicationPlugin XCM)
 target_link_libraries(XBotLoggingPlugin XCM)
 target_link_libraries(XBotNRTRef XCM)
+target_link_libraries(XBotRTCommunication XCM)
 
 # install include
 
@@ -65,3 +72,5 @@ ycm_library_install(XBotCommunicationPlugin 1 0 0)
 ycm_library_install(XBotLoggingPlugin 1 0 0)       
 
 ycm_library_install(XBotNRTRef 1 0 0)
+
+ycm_library_install(XBotRTCommunication 1 0 0)

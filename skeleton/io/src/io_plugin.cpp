@@ -24,7 +24,7 @@ REGISTER_XBOT_IO_PLUGIN_(XBotPlugin::_MODULE_PREFIX_)
 
 namespace XBotPlugin {
 
-bool XBotPlugin::_MODULE_PREFIX_::init(std::string path_to_config_file)
+bool XBotPlugin::_MODULE_PREFIX_::init(std::string path_to_config_file, XBot::SharedMemory::Ptr shmem)
 {
     return true;
 }

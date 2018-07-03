@@ -33,7 +33,7 @@ class CommunicationInterfaceFactory {
 
 public:
   
-  static std::shared_ptr<XBot::CommunicationInterface> getFactory(const std::string& file_name, const std::string& lib_name,  XBot::RobotInterface::Ptr _robot, XBot::XBotXDDP::Ptr);
+  static std::shared_ptr<XBot::CommunicationInterface> getFactory(const std::string& file_name, const std::string& lib_name,  XBot::RobotInterface::Ptr _robot, XBot::XBotIPC::Ptr);
 
   static void unloadLib(const std::string& file_name);
 
@@ -42,10 +42,6 @@ private:
   CommunicationInterfaceFactory() = delete;
   
   static std::map<std::string, void*> handles;
-  
-  static bool computeAbsolutePath ( const std::string& input_path,
-                                      const std::string& middle_path,
-                                      std::string& absolute_path );
   
 
 };

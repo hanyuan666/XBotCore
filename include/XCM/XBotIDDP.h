@@ -18,29 +18,31 @@
 */
 
 
-#ifndef __X_BOT_XDDP_H__
-#define __X_BOT_XDDP_H__
+#ifndef __X_BOT_IDDP_H__
+#define __X_BOT_IDDP_H__
 
 #include <XCM/XBotIPC.h>
 
+#include <XBotInterface/ModelInterface.h>
+
 namespace XBot
 {
-    class XBotXDDP;
+    class XBotIDDP;
 }
 
 
 /**
- * @brief XBotCore XDDP IPC interface implementation
+ * @brief XBotCore IDDP IPC interface implementation
  * 
  */
-class XBot::XBotXDDP : public XBot::XBotIPC
+class XBot::XBotIDDP : public XBot::XBotIPC
 {
 public:
     
-    typedef std::shared_ptr<XBot::XBotXDDP> Ptr;
+    typedef std::shared_ptr<XBot::XBotIDDP> Ptr;
     
-    XBotXDDP(std::string config_file);
-    virtual ~XBotXDDP();
+    XBotIDDP(std::string config_file);
+    virtual ~XBotIDDP();
     
     virtual bool init();
     
@@ -49,31 +51,33 @@ public:
     virtual void updateTX();
 
 private:
+    
+    XBot::ModelInterface::Ptr _xbotinterface;
 
     /**
-     * @brief fd reading from pipes: we read the robot from XBotCore XDDP pipe
+     * @brief fd reading from pipes: we read the robot from XBotCore IDDP pipe
      * 
      */
-    std::map<int,XBot::SubscriberNRT<XBot::RobotState>> fd_read;
+    std::map<int,XBot::SubscriberIDDP<XBot::RobotState>> fd_read;
     
     /**
-     * @brief fd writing to pipes: we write to the robot with XBotCore XDDP pipe
+     * @brief fd writing to pipes: we write to the robot with XBotCore IDDP pipe
      * 
      */
-    std::map<int,XBot::PublisherNRT<XBot::RobotState::pdo_tx>> fd_write;
+    std::map<int,XBot::PublisherIDDP<XBot::RobotState::pdo_tx>> fd_write;
     
     /**
-     * @brief fd reading from pipes: we read the robot F-T XBotCore XDDP pipe
+     * @brief fd reading from pipes: we read the robot F-T XBotCore IDDP pipe
      * 
      */
-    std::map<int,XBot::SubscriberNRT<XBot::RobotFT::pdo_rx>> fd_ft_read;
+    std::map<int,XBot::SubscriberIDDP<XBot::RobotFT::pdo_rx>> fd_ft_read;
     
     /**
-     * @brief fd reading from pipes: we read the robot IMU XBotCore XDDP pipe
+     * @brief fd reading from pipes: we read the robot IMU XBotCore IDDP pipe
      * 
      */
-    std::map<int,XBot::SubscriberNRT<XBot::RobotIMU::pdo_rx>> fd_imu_read;
+    std::map<int,XBot::SubscriberIDDP<XBot::RobotIMU::pdo_rx>> fd_imu_read;
 
 };
 
-#endif //__X_BOT_XDDP_H__
+#endif //__X_BOT_IDDP_H__

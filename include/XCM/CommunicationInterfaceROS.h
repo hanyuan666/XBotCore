@@ -41,7 +41,7 @@ public:
 
     CommunicationInterfaceROS();
     CommunicationInterfaceROS(XBotInterface::Ptr robot, 
-                              XBot::XBotXDDP::Ptr xddp_handler,
+                              XBot::XBotIPC::Ptr ipc_handler,
                               XBot::IXBotJoint::Ptr xbot_joint = nullptr
                              );
 
@@ -77,11 +77,10 @@ private:
 
     void load_robot_state_publisher();
 
-    static bool computeAbsolutePath ( const std::string& input_path,
-                                       const std::string& middle_path,
-                                       std::string& absolute_path );
-
-    bool _send_robot_state_ok, _receive_commands_ok, _publish_tf;
+    bool _send_robot_state_ok, _receive_commands_ok;
+    
+    // by default I publish the tf
+    bool _publish_tf = true;
 
     std::string _path_to_cfg;
 

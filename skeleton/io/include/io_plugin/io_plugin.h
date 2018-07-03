@@ -21,6 +21,7 @@
 #define _MODULE_PREFIX__IOPLUGIN_H_
 
 #include <XCM/IOPlugin.h>
+#include <XBotCore-interfaces/XBotSharedMemory.h>
 
 
 namespace XBotPlugin {
@@ -35,7 +36,7 @@ class _MODULE_PREFIX_ : public XBot::IOPlugin
 
 public:
 
-    virtual bool init(std::string path_to_config_file);
+    virtual bool init(std::string path_to_config_file, XBot::SharedMemory::Ptr shmem);
 
     virtual void run();
 

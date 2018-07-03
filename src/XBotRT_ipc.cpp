@@ -120,4 +120,88 @@ int xddp_connect ( const char * label ) {
 
     return s;
 }
-// kate: indent-mode cstyle; indent-width 4; replace-tabs on; 
+
+
+int iddp_bind ( const char * label, size_t local_poolsz ) {
+    struct rtipc_port_label plabel;
+    struct sockaddr_ipc saddr;
+    int s;
+    struct timeval tv;
+
+    /* Get a datagram socket to bind to the RT endpoint. Each
+     * endpoint is represented by a port number within the IDDP
+     * protocol namespace. */
+    if ( ( s=socket ( AF_RTIPC, SOCK_DGRAM, IPCPROTO_IDDP ) ) < 0 )
+        fail ( "socket" );
+
+
+    /* Set a port label. This name will be registered when
+     * binding, in addition to the port number (if given). */
+    strcpy ( plabel.label, label );
+    //strcpy(port_label, label);
+    if ( setsockopt ( s, SOL_IDDP, IDDP_LABEL, &plabel, sizeof ( plabel ) ) )
+        fail ( "setsockopt iddp_label" );
+    /*
+     * Set a local local_poolsz pool for the RT endpoint. Memory needed to
+     * convey datagrams will be pulled from this pool, instead of
+     * Xenomai's system pool.
+     */
+    if ( local_poolsz > 0 ) {
+        if ( setsockopt ( s, SOL_IDDP, IDDP_POOLSZ, &local_poolsz, sizeof ( local_poolsz ) ) )
+            fail ( "setsockopt iddp_poolsz" ); 
+    }
+
+    /*
+     * Bind the socket to the port, to setup a proxy to channel
+     * traffic to/from the Linux domain. Assign that port a label,
+     * so that peers may use a descriptive information to locate
+     * it. For instance, the pseudo-device matching our RT
+     * endpoint will appear as
+     * /proc/xenomai/registry/rtipc/iddp/<IDDP_PORT_LABEL> in the
+     * Linux domain, once the socket is bound.
+     *
+     * saddr.sipc_port specifies the port number to use. If -1 is
+     * passed, the IDDP driver will auto-select an idle port.
+     */
+    memset ( &saddr, 0, sizeof ( saddr ) );
+    saddr.sipc_family = AF_RTIPC;
+    saddr.sipc_port = -1;
+    if ( bind ( s, ( struct sockaddr * ) &saddr, sizeof ( saddr ) ) ) {
+        printf("Error %s %s\n", __FUNCTION__, label);
+        fail ( "bind" );
+    }
+
+    return s;
+}
+
+int iddp_connect ( const char * label ) {
+    struct rtipc_port_label plabel;
+    struct sockaddr_ipc saddr;
+    int s;
+    struct timeval tv;
+
+    /* Get a datagram socket to bind to the RT endpoint. Each
+     * endpoint is represented by a port number within the IDDP
+     * protocol namespace. */
+    if ( ( s=socket ( AF_RTIPC, SOCK_DGRAM, IPCPROTO_IDDP ) ) < 0 )
+        fail ( "socket" );
+
+
+    /* Set a port label. This name will be registered when
+     * binding, in addition to the port number (if given). */
+    strcpy ( plabel.label, label );
+    //strcpy(port_label, label);
+    if ( setsockopt ( s, SOL_IDDP, IDDP_LABEL, &plabel, sizeof ( plabel ) ) )
+        fail ( "setsockopt iddp_label" );
+
+    memset ( &saddr, 0, sizeof ( saddr ) );
+    saddr.sipc_family = AF_RTIPC;
+    saddr.sipc_port = -1;
+    if ( connect ( s, ( struct sockaddr * ) &saddr, sizeof ( saddr ) ) ) {
+        printf("Error %s %s - Errno-> %d\n", __FUNCTION__, label, errno);
+        fail ( "connect" );
+    }
+
+    return s;
+}
+

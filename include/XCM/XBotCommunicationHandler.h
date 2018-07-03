@@ -23,7 +23,7 @@
 #include <XCM/XBotThread.h>
 
 #include <XCM/XBotCommunicationInterface.h>
-#include <XCM/XBotXDDP.h>
+#include <XCM/XBotIPC.h>
 #include <XCM/IOPlugin.h>
 
 #include <XBotCore-interfaces/XDomainCommunication.h>
@@ -84,7 +84,7 @@ private:
     std::vector<XBot::PublisherNRT<XBot::Command>> _command_pub_vector;
     std::vector<XBot::SubscriberNRT<XBot::Command>> _status_sub_vector;
 
-    XBot::XBotXDDP::Ptr _xddp_handler;
+    XBot::XBotIPC::Ptr _ipc_handler;
     XBot::RobotInterface::Ptr _robot;
 
     std::vector<XBot::CommunicationInterface::Ptr> _communication_ifc_vector;
