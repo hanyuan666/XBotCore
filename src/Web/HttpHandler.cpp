@@ -178,6 +178,13 @@ void HttpHandler::handleGet(std::shared_ptr<ResponseInterface>& response){
 	    urdf::LinkConstSharedPtr linkp = sharedData->model.getLink(parent_link);
 	    urdf::LinkConstSharedPtr linkc = sharedData->model.getLink(child_link);
 	    
+	    double lLimit=0, uLimit=0, effLimit=0, velLimit=0;
+	    if (jptr->limits) {
+	      lLimit = jptr->limits->lower;	    
+	      uLimit = jptr->limits->upper;
+	      effLimit = jptr->limits->effort;
+	      velLimit = jptr->limits->velocity;	    
+	    }
 	    urdf::Vector3 axis = jptr->axis;
 	    urdf::Vector3 pos = jptr->parent_to_joint_origin_transform.position;
 	    double x,y,z,w;
@@ -223,6 +230,13 @@ void HttpHandler::handleGet(std::shared_ptr<ResponseInterface>& response){
 	    writer.Double(rx);
 	    writer.Double(ry);
 	    writer.Double(rz);
+	    writer.EndArray();
+	    writer.Key("Limits");
+	    writer.StartArray();
+	    writer.Double(lLimit);
+	    writer.Double(uLimit);
+	    writer.Double(effLimit);
+	    writer.Double(velLimit);
 	    writer.EndArray();
 	    writer.EndObject();
 	}
