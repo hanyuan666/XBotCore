@@ -27,7 +27,7 @@
 #include <boost/bind.hpp>
 #include <RobotInterfaceROS/GenericControlMessage.h>
 #include <RobotInterfaceROS/GenericJointStateMessage.h>
-#include <robot_state_publisher/robot_state_publisher.h>
+#include <robot_state_publisher_advr/robot_state_publisher_advr.h>
 
 #include <XBotCore/cmd_service.h>
 #include <XBotCore/status_service.h>
@@ -113,7 +113,7 @@ private:
     std::map<std::string, ros::ServiceServer> _services;
     std::map<std::string, std::string> _msgs;
 
-    std::shared_ptr<robot_state_publisher::RobotStatePublisher> _robot_state_pub;
+    std::shared_ptr<robot_state_publisher_advr::RobotStatePublisher> _robot_state_pub;
     std::string _tf_prefix, _urdf_param_name;
 
     std::map<int, ros::Publisher> _imu_pub_map;

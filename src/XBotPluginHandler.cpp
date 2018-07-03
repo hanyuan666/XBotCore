@@ -278,7 +278,8 @@ bool PluginHandler::init_plugins(std::shared_ptr<HALBase> halInterface,
     if (halInterface)
       _halInterface = halInterface;
     
-    _joint = _halInterface->getJoint();   
+    if(_halInterface)
+      _joint = _halInterface->getJoint();   
     _model = model;
   
     _plugin_init_success.resize(_rtplugin_vector.size(), false);
