@@ -86,20 +86,23 @@ void XBot::XBotCommunicationPlugin::on_stop(double time)
 void XBot::XBotCommunicationPlugin::control_loop(double time, double period)
 {
 
-    //if(command.read(current_command)){
         if(current_command.str() == "filter ON"){
-            _filter_q.setOmega(2*3.1415*1.0);
-            _filter_k.setOmega(2*3.1415*1.0);
-            _filter_d.setOmega(2*3.1415*1.0);
-            _filter_qdot.setOmega(2*3.1415*1.0);
+	    double cutoff_freq = 5.0;
+	    XBot::Logger::warning() << "Filter ON: running at " << cutoff_freq << " Hz" << XBot::Logger::endl();
+            _filter_q.setOmega(2*3.1415*cutoff_freq);
+            _filter_k.setOmega(2*3.1415*cutoff_freq);
+            _filter_d.setOmega(2*3.1415*cutoff_freq);
+            _filter_qdot.setOmega(2*3.1415*cutoff_freq);
         }
         if(current_command.str() == "filter OFF"){
-            _filter_q.setOmega(2*3.1415*200);
-            _filter_k.setOmega(2*3.1415*200);
-            _filter_d.setOmega(2*3.1415*200);
-            _filter_qdot.setOmega(2*3.1415*200);
+	    double cutoff_freq = 20.0;
+	    XBot::Logger::warning() << "Filter OFF: running at " << cutoff_freq << " Hz" << XBot::Logger::endl();
+
+            _filter_q.setOmega(2*3.1415*cutoff_freq);
+            _filter_k.setOmega(2*3.1415*cutoff_freq);
+            _filter_d.setOmega(2*3.1415*cutoff_freq);
+            _filter_qdot.setOmega(2*3.1415*cutoff_freq);
         }
-    //}
     
     // read from shared memory the ref maps and set them
 
