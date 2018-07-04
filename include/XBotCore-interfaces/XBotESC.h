@@ -21,6 +21,7 @@
 #define __X_BOT_ESC_H__
 
 #include <stdint.h>
+//#include <XBotCore-interfaces/XDomainCommunication.h>
 
 namespace XBot {
 
@@ -197,7 +198,8 @@ struct RobotState {
         double    fault;
         double    rtt;               
         double    op_idx_ack;        
-        double    aux;               
+        double    aux;
+        char      fault_string[40];
 
     } RobotStateRX __attribute__ ( ( __packed__ ) ); 
 

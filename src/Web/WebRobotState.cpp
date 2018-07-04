@@ -39,6 +39,7 @@ void WebRobotStateTX::serialize(StringBuffer& buffer){
         serializeArray(writer,"vel_ref",vel_ref);
         serializeArray(writer,"eff_ref",effort_ref);
         serializeArray(writer,"fault",fault);
+        serializeArray(writer,"fault_string",fault_string);
         serializeArray(writer,"aux",aux);
         writer.EndObject();
 	

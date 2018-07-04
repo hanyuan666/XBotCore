@@ -70,6 +70,7 @@ class WebRobotStateTX {
     std::vector<double> stiffness;
     std::vector<double> damping;
     std::vector<double> fault;
+    std::vector<std::string> fault_string;
     std::vector<double> aux;
     
     std::vector<double> position_ref;

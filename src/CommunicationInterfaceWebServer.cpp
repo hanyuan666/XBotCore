@@ -199,6 +199,9 @@ void CommunicationInterfaceWebServer::sendRobotState()
         double fault_value;
         _ipc_handler->get_fault(id, fault_value);
         
+        std::string string_fault;
+        _ipc_handler->get_fault_as_string(id,string_fault);
+        
         double aux_value;
         _ipc_handler->get_aux(id, aux_value);
         
@@ -213,6 +216,7 @@ void CommunicationInterfaceWebServer::sendRobotState()
         rstate.damping.push_back(dampval);
         rstate.fault.push_back(fault_value);
         rstate.aux.push_back(aux_value);
+        rstate.fault_string.push_back(string_fault);
         
         rstate.position_ref.push_back(pos_ref);
         rstate.vel_ref.push_back(vel_ref);
