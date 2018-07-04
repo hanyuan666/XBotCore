@@ -387,3 +387,6 @@ INSTALL(PROGRAMS scripts/generate_XBot_IOPlugin.sh DESTINATION bin)
 INSTALL(PROGRAMS scripts/get_xbot_config DESTINATION bin)
 INSTALL(PROGRAMS scripts/set_xbot_config DESTINATION bin)
 INSTALL(PROGRAMS scripts/open_xbot_config DESTINATION bin)
+
+# install setup.bash for the release DEB
+Install(PROGRAMS setup.bash DESTINATION share/xbot)
