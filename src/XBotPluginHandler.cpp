@@ -435,7 +435,7 @@ void XBot::PluginHandler::fill_robot_state()
         
         std::string fault_string;
         _joint->get_fault_as_string(id, fault_string);        
-        strcpy(_robot_state_map.at(id).RobotStateRX.fault_string,fault_string.c_str() );
+        strncpy(_robot_state_map.at(id).RobotStateRX.fault_string,fault_string.c_str(), 80 );
         
         _robot_state_map.at(id).RobotStateRX.fault = fault_value;
         _robot_state_map.at(id).RobotStateRX.temperature = temperature;
