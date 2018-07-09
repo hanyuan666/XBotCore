@@ -83,7 +83,7 @@ class SharedData {
     
     urdf::ModelInterface model;
     
-    std::map<std::string, int> ft_sensors;
+    std::map<std::string, int> sensors;
      
   private:
        

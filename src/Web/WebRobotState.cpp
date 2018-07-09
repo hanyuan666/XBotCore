@@ -45,10 +45,21 @@ void WebRobotStateTX::serialize(StringBuffer& buffer){
 	
 	writer.Key("Sensors");
 	writer.StartObject();  
+	writer.Key("fts");
+	writer.StartObject();  
 	serializeArray(writer,"ft_name", ftsensor.ft_name);
 	serializeArray(writer,"ft_id",ftsensor.ft_id);
 	ftsensor.serializeArray(writer,"force",ftsensor.force);
 	ftsensor.serializeArray(writer,"torque", ftsensor.torque);
+	writer.EndObject(); 
+	writer.Key("imus");
+	writer.StartObject();  
+	serializeArray(writer,"imu_name", imusensor.imu_name);
+	serializeArray(writer,"imu_id",imusensor.imu_id);
+	imusensor.serializeArray(writer,"ang_vel",imusensor.ang_velocity);
+	imusensor.serializeArray(writer,"lin_acc", imusensor.lin_acceleration);
+	imusensor.serializeArray(writer,"orientation", imusensor.orientation);
+	writer.EndObject(); 
 	writer.EndObject();  
 	writer.EndObject();  
 }
@@ -101,6 +112,41 @@ void WebFTSensor::serializeArray(Writer< StringBuffer >& writer, std::string key
       writer.Double(val.x);
       writer.Double(val.y);
       writer.Double(val.z);
+      writer.EndArray();
+      writer.EndObject(); 
+    }
+    writer.EndArray();
+}
+
+void WebIMUSensor::serializeArray(Writer< StringBuffer >& writer, std::string key, std::vector< WebIMUSensor::Vector3 >& array)
+{
+    writer.Key(key.c_str());   
+    writer.StartArray();
+    for( Vector3 val : array ){  
+      writer.StartObject(); 
+      writer.Key("Vector");
+      writer.StartArray();
+      writer.Double(val.x);
+      writer.Double(val.y);
+      writer.Double(val.z);
+      writer.EndArray();
+      writer.EndObject(); 
+    }
+    writer.EndArray();
+}
+
+void WebIMUSensor::serializeArray(Writer< StringBuffer >& writer, std::string key, std::vector< WebIMUSensor::Vector4 >& array)
+{
+    writer.Key(key.c_str());   
+    writer.StartArray();
+    for( Vector4 val : array ){  
+      writer.StartObject(); 
+      writer.Key("Vector");
+      writer.StartArray();
+      writer.Double(val.vec.x);
+      writer.Double(val.vec.y);
+      writer.Double(val.vec.z);
+      writer.Double(val.w);
       writer.EndArray();
       writer.EndObject(); 
     }

@@ -55,6 +55,45 @@ class WebFTSensor {
   
 };
 
+class WebIMUSensor {
+  
+  public:
+    
+    struct Vector3{
+      
+      Vector3(double x, double y, double z){
+	
+	this->x = x;
+	this->y = y;
+	this->z = z;
+	
+      }
+      
+      double x;
+      double y;
+      double z;
+    };
+    
+    struct Vector4{
+      
+      Vector4(double x, double y, double z, double w):vec(x,y,z){
+	this->w = w;	
+      }      
+      double w;
+      Vector3 vec;
+    };
+    
+    std::vector<std::string> imu_name;
+    std::vector<int> imu_id;
+    std::vector<Vector3> ang_velocity;
+    std::vector<Vector3> lin_acceleration;
+    std::vector<Vector4> orientation;
+     
+    void serializeArray(Writer<StringBuffer>& writer, std::string key, std::vector<Vector3>& array);
+    void serializeArray(Writer<StringBuffer>& writer, std::string key, std::vector<Vector4>& array);
+  
+};
+
 class WebRobotStateTX {
   
   public:
@@ -78,6 +117,7 @@ class WebRobotStateTX {
     std::vector<double> effort_ref;
     
     WebFTSensor ftsensor;
+    WebIMUSensor imusensor;
     
     //XBot::RobotState::pdo_rx pdo_rx;
     //hand
