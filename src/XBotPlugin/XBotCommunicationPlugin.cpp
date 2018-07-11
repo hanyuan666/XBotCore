@@ -56,7 +56,8 @@ bool XBot::XBotCommunicationPlugin::init_control_plugin(XBot::Handle::Ptr handle
     _tor_ref_map = handle->getSharedMemory()->getSharedObject<XBot::JointIdMap>("tor_ref_map_so");
     _k_ref_map = handle->getSharedMemory()->getSharedObject<XBot::JointIdMap>("k_ref_map_so");
     _d_ref_map = handle->getSharedMemory()->getSharedObject<XBot::JointIdMap>("d_ref_map_so");
-    
+   
+    _logger = XBot::MatLogger::getLogger("/tmp/XBotCommunicationPlugin"); 
     return true;
 }
 
@@ -134,6 +135,7 @@ void XBot::XBotCommunicationPlugin::control_loop(double time, double period)
 
     if(_filter_enabled){
         _robot->getPositionReference(_qref);
+	_logger->add("not_filtered_qref", _qref);
         _robot->setPositionReference(_filter_q.process(_qref));
 
         _robot->getStiffness(_kref);

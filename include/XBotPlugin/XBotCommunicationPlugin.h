@@ -75,6 +75,8 @@ private:
 
     Thread_hook::Ptr _ch;
 
+    XBot::MatLogger::Ptr _logger;
+
 };
 
 #endif //__X_BOT_COMMUNICATION_PLUGIN_H__
