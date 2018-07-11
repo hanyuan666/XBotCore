@@ -325,6 +325,7 @@ void XBot::CommunicationHandler::th_loop(void*)
                 // HACK restarting XBotCommunicationPlugin
                 std::string cmd = "stop";
                 _switch_pub_vector[xbot_communication_idx].write(cmd);
+                _master_communication_ifc->resetReference();
                 sleep(1);
                 cmd = "start";
                 _switch_pub_vector[xbot_communication_idx].write(cmd);
@@ -379,7 +380,13 @@ void XBot::CommunicationHandler::th_loop(void*)
             if( comm_ifc->receiveFromSwitch(_switch_names[i], command) ){
                 _switch_pub_vector[i].write(command);
                 if (i == xbot_communication_idx && command == "start")
-                    _master_communication_ifc->resetReference();
+                {
+                    _reset_ref = false;
+                }
+                else if (i == xbot_communication_idx && command == "stop")
+                {
+                    _reset_ref = true;
+                }
             }
             if( comm_ifc->receiveFromCmd(_command_names[i], command) ){
                 _command_pub_vector[i].write(command);
@@ -405,6 +412,9 @@ void XBot::CommunicationHandler::th_loop(void*)
 
     /* Receive commands from the master communication handler,
      * i.e. the only one enabled to send commands to the robot */
+    if(_reset_ref) {
+        _master_communication_ifc->resetReference();
+    }
     _master_communication_ifc->receiveReference(); // this updates robot
     
     /* Run external plugins */

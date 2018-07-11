@@ -423,6 +423,7 @@ void CommunicationInterfaceROS::sendRobotState()
 
 void CommunicationInterfaceROS::resetReference()
 {
+    
     _robot->getPositionReference(_joint_id_map);
     
     for( const auto& pair : _jointid_to_command_msg_idx ){
@@ -470,7 +471,7 @@ void CommunicationInterfaceROS::receiveReference()
 
     ros::spinOnce();
     
-    if (current_seq_id < _control_message->seq_id()) {
+//     if (current_seq_id < _control_message->seq_id()) {
         
         current_seq_id = _control_message->seq_id();
 
@@ -515,10 +516,10 @@ void CommunicationInterfaceROS::receiveReference()
 
         _robot->setDamping(_joint_id_map);
 
-    }
-    else {
-        resetReference();
-    }
+//     }
+//     else {
+        // resetReference();
+//     }
 //     
     
     /* HAND */

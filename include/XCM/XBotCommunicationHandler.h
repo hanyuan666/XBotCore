@@ -108,6 +108,8 @@ private:
     RosUtils::RosHandle::Ptr _roshandle = nullptr;
     SharedObject<RosUtils::RosHandle::Ptr> _roshandle_shobj;
     
+    bool _reset_ref = true;
+    
 };
 }
 
