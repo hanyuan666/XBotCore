@@ -21,6 +21,7 @@
 #define __X_BOT_ESC_H__
 
 #include <stdint.h>
+//#include <XBotCore-interfaces/XDomainCommunication.h>
 
 namespace XBot {
 
@@ -120,13 +121,6 @@ struct HeriHandEscPdoTypes {
     struct pdo_tx {
         float       pos_ref;    // rad   
         float       pos_ref_2;  // rad   
-        int16_t     vel_ref;    // mrad/s 
-        int16_t     tor_ref;    // mNm
-        uint16_t    gain_0;      
-        uint16_t    gain_1;     
-        uint16_t    gain_2;     
-        uint16_t    gain_3;     
-        uint16_t    gain_4;     
         uint16_t    fault_ack;
         uint16_t    ts;
         uint16_t    op_idx_aux;  // op [get/set] , idx
@@ -138,8 +132,6 @@ struct HeriHandEscPdoTypes {
     struct pdo_rx {
         float        motor_pos;     // rad
         float        motor_pos_2;   // rad
-        int16_t      motor_vel;     // mrad/s
-        int16_t      motor_vel_2;   // mrad/s
         uint16_t     m1_an_1;       // motor 1 analog 1
         uint16_t     m1_an_2;       // motor 1 analog 2
         uint16_t     m1_an_3;       // motor 1 analog 3
@@ -197,7 +189,8 @@ struct RobotState {
         double    fault;
         double    rtt;               
         double    op_idx_ack;        
-        double    aux;               
+        double    aux;
+        char      fault_string[80];
 
     } RobotStateRX __attribute__ ( ( __packed__ ) ); 
 

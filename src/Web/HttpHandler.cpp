@@ -251,10 +251,11 @@ void HttpHandler::handleGet(std::shared_ptr<ResponseInterface>& response){
 	    writer.Key("Name");
 	    writer.String( link->name.c_str());
 	    
-	    if (sharedData->ft_sensors.count(link->name)){
+	    if (sharedData->sensors.count(link->name)){
 	       writer.Key("Sensor");
 	       writer.String( link->name.c_str());
 	    }
+	    
 	    if( link->visual){
 	      urdf::Vector3 pos = link->visual->origin.position;
 	      double x,y,z,w;

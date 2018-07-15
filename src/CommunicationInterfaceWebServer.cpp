@@ -83,7 +83,14 @@ CommunicationInterfaceWebServer::CommunicationInterfaceWebServer(XBotInterface::
 	std::string s =t.first;
 	XBot::ForceTorqueSensor::ConstPtr sensor =  t.second;
 	int id = sensor->getSensorId();
-	sharedData->ft_sensors[s]= id;
+	sharedData->sensors[s]= id;
+    }
+    
+    for (auto &t :  _robot->getImu()){
+	std::string s =t.first;
+	XBot::ImuSensor::ConstPtr sensor =  t.second;
+	int id = sensor->getSensorId();
+	sharedData->sensors[s]= id;
     }
 
     
@@ -176,6 +183,25 @@ void CommunicationInterfaceWebServer::sendRobotState()
 	ftsensor.torque.push_back(WebFTSensor::Vector3(torque[0],torque[1], torque[2]));
     }
     
+    WebIMUSensor imusensor;
+    
+    for (auto &t :  _robot->getImu()){
+	std::string s =t.first;
+	XBot::ImuSensor::ConstPtr sensor =  t.second;
+	Eigen::Vector3d ang_vel;
+	sensor->getAngularVelocity(ang_vel);
+	Eigen::Vector3d lin_acc;
+	sensor->getLinearAcceleration(lin_acc);
+	Eigen::Quaterniond orientation;
+	sensor->getOrientation(orientation);
+	int id = sensor->getSensorId();
+	imusensor.imu_id.push_back(id);
+	imusensor.imu_name.push_back(s);
+	imusensor.ang_velocity.push_back(WebIMUSensor::Vector3(ang_vel[0],ang_vel[1], ang_vel[2]));
+	imusensor.lin_acceleration.push_back(WebIMUSensor::Vector3(lin_acc[0],lin_acc[1], lin_acc[2]));
+	imusensor.orientation.push_back(WebIMUSensor::Vector4(orientation.x(),orientation.y(),orientation.z(),orientation.w()));
+    }
+    
     WebRobotStateTX rstate;  
     
     for ( auto s: _robot->getEnabledJointNames()) {      
@@ -199,6 +225,9 @@ void CommunicationInterfaceWebServer::sendRobotState()
         double fault_value;
         _ipc_handler->get_fault(id, fault_value);
         
+        std::string string_fault;
+        _ipc_handler->get_fault_as_string(id,string_fault);
+        
         double aux_value;
         _ipc_handler->get_aux(id, aux_value);
         
@@ -213,6 +242,7 @@ void CommunicationInterfaceWebServer::sendRobotState()
         rstate.damping.push_back(dampval);
         rstate.fault.push_back(fault_value);
         rstate.aux.push_back(aux_value);
+        rstate.fault_string.push_back(string_fault);
         
         rstate.position_ref.push_back(pos_ref);
         rstate.vel_ref.push_back(vel_ref);
@@ -220,6 +250,7 @@ void CommunicationInterfaceWebServer::sendRobotState()
     }
     
     rstate.ftsensor = ftsensor;
+    rstate.imusensor = imusensor;
     
     if(sharedData->getNumClient().load() <= 0) {
         buffer->clear();

@@ -81,6 +81,8 @@ public:
     
     virtual bool get_fault(int joint_id, double& fault) final;
     
+    virtual bool get_fault_as_string(int joint_id, std::string& fault) final;
+    
     virtual bool get_rtt(int joint_id, double& rtt) final;
     
     virtual bool get_op_idx_ack(int joint_id, double& op_idx_ack) final;

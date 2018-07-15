@@ -117,6 +117,12 @@ bool XBot::XBotIPC::get_fault(int joint_id, double& fault)
     return true;
 }
 
+bool XBot::XBotIPC::get_fault_as_string(int joint_id, std::string& fault)
+{
+    fault = std::string( pdo_motor.at(joint_id)->RobotStateRX.fault_string);
+    return true;
+}
+ 
 bool XBot::XBotIPC::get_rtt(int joint_id, double& rtt)
 {
     rtt = pdo_motor.at(joint_id)->RobotStateRX.rtt;
