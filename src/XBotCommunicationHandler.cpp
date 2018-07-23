@@ -314,6 +314,8 @@ void XBot::CommunicationHandler::th_loop(void*)
         std::string master;
 
         if( comm_ifc->receiveMasterCommunicationInterface(master) ) {
+	
+	    _master_communication_interface_name = master;
 
             if ( master == "ROS" ||
                  master == "ros"
@@ -412,7 +414,7 @@ void XBot::CommunicationHandler::th_loop(void*)
 
     /* Receive commands from the master communication handler,
      * i.e. the only one enabled to send commands to the robot */
-    if(_reset_ref) {
+    if( (_master_communication_interface_name == "ros" || _master_communication_interface_name == "ROS") && _reset_ref) {
         _master_communication_ifc->resetReference();
     }
     _master_communication_ifc->receiveReference(); // this updates robot

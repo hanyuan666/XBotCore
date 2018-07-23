@@ -88,7 +88,7 @@ void XBot::XBotCommunicationPlugin::control_loop(double time, double period)
 {
 
         if(current_command.str() == "filter ON"){
-	    double cutoff_freq = 5.0;
+	    double cutoff_freq = 1.0;
 	    XBot::Logger::warning() << "Filter ON: running at " << cutoff_freq << " Hz" << XBot::Logger::endl();
             _filter_q.setOmega(2*3.1415*cutoff_freq);
             _filter_k.setOmega(2*3.1415*cutoff_freq);
