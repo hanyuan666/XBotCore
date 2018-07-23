@@ -313,14 +313,14 @@ void XBot::CommunicationHandler::th_loop(void*)
 
         std::string master;
 
-        if( comm_ifc->receiveMasterCommunicationInterface(master) ) {
-	
-	    _master_communication_interface_name = master;
+        if( comm_ifc->receiveMasterCommunicationInterface(master) ) {	        	
+
 
             if ( master == "ROS" ||
                  master == "ros"
             ) {
                 Logger::info(Logger::Severity::HIGH) << "Switching to ROS Master Communication Interface" << Logger::endl();
+	    	_master_communication_interface_name = master;
 
 #ifdef USE_ROS_COMMUNICATION_INTERFACE
                 _master_communication_ifc = _ros_communication;
@@ -341,6 +341,8 @@ void XBot::CommunicationHandler::th_loop(void*)
                     ) {
                 if (loadWebServer) {
                     Logger::info(Logger::Severity::HIGH) << "Switching to WEB Master Communication Interface" << Logger::endl();
+		    
+	    	    _master_communication_interface_name = master;
                     _master_communication_ifc = _web_communication;
                     // HACK restarting XBotCommunicationPlugin
                     std::string cmd = "stop";
@@ -360,6 +362,7 @@ void XBot::CommunicationHandler::th_loop(void*)
             ) {
                 Logger::info(Logger::Severity::HIGH) << "Switching to YARP Master Communication Interface" << Logger::endl();
 
+	        _master_communication_interface_name = master;
 #ifdef USE_YARP_COMMUNICATION_INTERFACE
                 _master_communication_ifc = _yarp_communication;
                 // HACK restarting XBotCommunicationPlugin
@@ -415,7 +418,6 @@ void XBot::CommunicationHandler::th_loop(void*)
     /* Receive commands from the master communication handler,
      * i.e. the only one enabled to send commands to the robot */
     if( (_master_communication_interface_name == "ros" || _master_communication_interface_name == "ROS") && _reset_ref) {
-        _master_communication_ifc->resetReference();
     }
     _master_communication_ifc->receiveReference(); // this updates robot
     
