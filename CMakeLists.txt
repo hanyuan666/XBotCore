@@ -58,7 +58,7 @@ endif()
 if ( Xenomai_FOUND )
     set(RT_NRT_SRC
         src/XBotRT_thread.cpp
-        src/XBotNRT_thread.cpp
+        #src/XBotNRT_thread.cpp
         src/XBotRT_ipc.cpp
         )
 else()
@@ -230,7 +230,8 @@ add_library(XCM SHARED ${XBotInterface_INCLUDES}
                         src/PluginFactory.cpp
                         src/IOPluginFactory.cpp
                         ${COMMUNICATION_INTERFACE_SOURCE_FILES}
-                        ${RT_NRT_SRC}  
+                        ${RT_NRT_SRC} 
+                        src/XBotRT_thread.cpp
                         src/Loader.cpp
                         )
                         
@@ -252,7 +253,7 @@ add_library(XCM_no_xeno SHARED ${XBotInterface_INCLUDES}
                         src/PluginFactory.cpp
                         src/IOPluginFactory.cpp
                         ${COMMUNICATION_INTERFACE_SOURCE_FILES}       
-                        src/XBotNRT_thread.cpp
+                        src/XBotRT_thread.cpp
                         src/Loader.cpp
                         )                        
 

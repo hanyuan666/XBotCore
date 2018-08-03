@@ -9,63 +9,36 @@ using XBot::Logger;
 ///////////////////////////////////////////////////////////////////////////////
 //
 ///////////////////////////////////////////////////////////////////////////////
-
-void * XBot::rt_periodic_thread ( Thread_hook_Ptr th_hook ) {
-    int             ret = 0;
-    struct timespec starttp, periodtp;
-#ifdef __COBALT__
+void * XBot::periodic_thread ( Thread_hook_Ptr th_hook ) {
+    
+    int                 ret = 0;
+    struct timespec     starttp, periodtp;
     struct itimerspec   period_timer_conf;
-#endif
-    unsigned long   overruns;
+    unsigned long       overruns;
 
     // thread specific initialization
     th_hook->th_init ( 0 );
 
-    Logger::info() << "THREAD INIT: name = " << th_hook->name << ", period " << th_hook->period.period.tv_usec << " us" << Logger::endl();
+    DPRINTF ( "%s %s period %ld us\n",
+              __FUNCTION__, th_hook->name,
+              th_hook->period.period.tv_usec );
 
-#ifdef __COBALT__
     ret = pthread_setname_np ( pthread_self(), th_hook->name );
-#else
-    ret = pthread_set_name_np ( pthread_self(), th_hook->name );
-#endif
-    
     if ( ret != 0 ) {
         DPRINTF ( "%s : pthread_set_name_np() return code %d\n",
                   th_hook->name, ret );
         exit ( 1 );
     }
-
+#ifdef __COBALT__
     // PTHREAD_WARNSW, when set, cause the signal SIGXCPU to be sent to the
     // current thread, whenever it involontary switches to secondary mode;
-#ifdef __COBALT__
-    ret = pthread_setmode_np ( 0, PTHREAD_WARNSW, 0);
-#else
-    ret = pthread_set_mode_np ( 0, PTHREAD_WARNSW);
-#endif
-    
+    ret = pthread_setmode_np ( 0, PTHREAD_WARNSW, 0 );
     if ( ret != 0 ) {
         DPRINTF ( "%s : pthread_set_mode_np() return code %d\n",
                   th_hook->name, ret );
         exit ( 1 );
     }
-
-    periodtp.tv_sec = 0ULL;
-    periodtp.tv_nsec = th_hook->period.period.tv_usec * 1000ULL;
-    clock_gettime ( CLOCK_REALTIME, &starttp );
-    starttp.tv_nsec += periodtp.tv_nsec;
-    tsnorm ( &starttp );
-
-#ifdef __XENO__
-    ret = pthread_make_periodic_np ( pthread_self(), &starttp, &periodtp );
-    if ( ret != 0 ) {
-        DPRINTF ( "%s : pthread_make_periodic_np() return code %d\n",
-                  th_hook->name, ret );
-        exit ( 1 );
-    }
 #endif
-
-#ifdef __COBALT__
-
     th_hook->fd_timer = timerfd_create(CLOCK_MONOTONIC, 0);
     if ( th_hook->fd_timer == -1 ) {
         DPRINTF ( "%s : timerfd_create() return code %d\n",
@@ -88,40 +61,8 @@ void * XBot::rt_periodic_thread ( Thread_hook_Ptr th_hook ) {
         exit ( 1 );        
     }
     
-    
-#endif
-
-    Logger::success(Logger::Severity::HIGH) << "Thread " << th_hook->name << ": start looping" << Logger::endl();
-
-#if defined(__XENO__)
-    
-    while ( th_hook->_run_loop ) {
-
-        // return 0 if the period expires as expected
-        /* - EPERM, the calling context is invalid;
-         * - EWOULDBLOCK, the calling thread is not periodic;
-         * - EINTR, this service was interrupted by a signal;
-         * - ETIMEDOUT, at least one overrun occurred.
-         */
-        ret = pthread_wait_np ( &overruns );
-
-        switch ( ret ) {
-        case ETIMEDOUT :
-            DPRINTF ( "%s : pthread_wait_np() ETIMEDOUT %lu\n", th_hook->name, overruns );
-            break;
-        case EPERM :
-        case EWOULDBLOCK :
-        case EINTR :
-            DPRINTF ( "%s : pthread_wait_np() return code %d\n", th_hook->name, ret );
-            exit ( 1 );
-        }
-
-        // thread specific loop
-        th_hook->th_loop ( 0 );
-
-    } // end while
-    
-#elif defined(__COBALT__)
+    DPRINTF ( "%s %s : start looping ...\n", 
+              __FUNCTION__, th_hook->name );
 
     while ( th_hook->_run_loop ) {
 
@@ -138,9 +79,8 @@ void * XBot::rt_periodic_thread ( Thread_hook_Ptr th_hook ) {
 
     } // end while
 
-
-#endif
-
+    DPRINTF ( "%s %s : exit thread ...\n",
+              __FUNCTION__, th_hook->name );
 
     return 0;
 }
@@ -150,40 +90,37 @@ void * XBot::rt_periodic_thread ( Thread_hook_Ptr th_hook ) {
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-void * XBot::rt_non_periodic_thread ( Thread_hook_Ptr th_hook ) {
+void * XBot::non_periodic_thread ( Thread_hook_Ptr th_hook ) {
     int ret = 0;
 
     // thread specific initialization
     th_hook->th_init ( 0 );
 
-    Logger::info() << "THREAD INIT: name = " << th_hook->name << ", period " << th_hook->period.period.tv_usec << " us" << Logger::endl();
+    DPRINTF ( "%s %s, period %ld us\n",
+              __FUNCTION__, th_hook->name,
+              th_hook->period.period.tv_usec );
 
-#ifdef __COBALT__
     ret = pthread_setname_np ( pthread_self(), th_hook->name );
-#else
-    ret = pthread_set_name_np ( pthread_self(), th_hook->name );
-#endif
     if ( ret != 0 ) {
-        DPRINTF ( "%s : pthread_set_name_np() return code %d\n",
+        DPRINTF ( "%s : pthread_setname_np() return code %d\n",
                   th_hook->name, ret );
         exit ( 1 );
     }
 
+#ifdef __COBALT__
     // PTHREAD_WARNSW, when set, cause the signal SIGXCPU to be sent to the
     // current thread, whenever it involontary switches to secondary mode;
-#ifdef __COBALT__
-    ret = pthread_setmode_np ( 0, PTHREAD_WARNSW, 0);
-#else 
-    ret = pthread_set_mode_np ( 0, PTHREAD_WARNSW);
-#endif
-    
+    ret = pthread_setmode_np ( 0, PTHREAD_WARNSW, 0 );
     if ( ret != 0 ) {
         DPRINTF ( "%s : pthread_set_mode_np() return code %d\n",
                   th_hook->name, ret );
         exit ( 1 );
     }
+#endif
 
-    Logger::success(Logger::Severity::HIGH) << "Thread " << th_hook->name << ": start looping" << Logger::endl();
+    DPRINTF ( "%s %s : start looping ...\n",
+              __FUNCTION__, th_hook->name );
+
 
     while ( th_hook->_run_loop ) {
 
@@ -191,9 +128,10 @@ void * XBot::rt_non_periodic_thread ( Thread_hook_Ptr th_hook ) {
         th_hook->th_loop ( 0 );
 
     } // end while
-    
-    Logger::info(Logger::Severity::HIGH) << "Cleanly exiting RT thread: " << ( *th_hook ).name << Logger::endl(); 
 
+    DPRINTF ( "%s %s : exit thread ...\n",
+              __FUNCTION__, th_hook->name );
+    
     return 0;
 }
 

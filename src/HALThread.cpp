@@ -135,11 +135,11 @@ void XBot::HALThread::set_thread_priority()
 {
 
     // set scheduler policy
-#if defined( __XENO__ ) || defined( __COBALT__ )
+//#if defined( __XENO__ ) || defined( __COBALT__ )
     schedpolicy = SCHED_FIFO;
-#else
-    schedpolicy = SCHED_OTHER;
-#endif
+//#else
+    //schedpolicy = SCHED_OTHER;
+//#endif
     
     // set scheduler priority and stacksize
     priority = sched_get_priority_max(schedpolicy);

@@ -65,6 +65,7 @@ protected:
 private:
     
     const Options _options;
+    //std::string thread_name;
     
     std::vector<std::string> _io_plugin_names;
     std::vector<std::shared_ptr<IOPlugin>> _io_plugin_ptr;

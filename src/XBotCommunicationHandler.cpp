@@ -41,7 +41,10 @@ XBot::CommunicationHandler::CommunicationHandler(std::string path_to_config,
     _options(opt)
 {
     // set thread name
-    name = "XBOT_COMMHANDLER"; //TBD understand why pthread_setname_np return code error 3
+   // this->thread_name = thread_name;
+    // set thread name
+    //name = this->thread_name.c_str();
+    name = "XBOT_COMHDLR"; //TBD understand why pthread_setname_np return code error 3
     
     // Set thread period
     task_period_t t;
