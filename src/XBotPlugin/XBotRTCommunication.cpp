@@ -123,7 +123,7 @@ void XBot::XBotRTCommunication::control_loop(double time, double period)
     for( auto& p : _sub_write_to_hal) {
         
         p.second.read(_robot_state_tx_map[p.first]);
-        XBot::Logger::error() << _robot_state_tx_map[p.first].pos_ref << XBot::Logger::endl();  
+//         XBot::Logger::error() << _robot_state_tx_map[p.first].pos_ref << XBot::Logger::endl();  
     }
 
     _esc_utils->setReferenceFromRobotStateTX(_robot_state_tx_map);
